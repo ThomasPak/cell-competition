@@ -42,7 +42,7 @@ class TestCellCompetitionParameters : public CxxTest::TestSuite
             TS_ASSERT_EQUALS(param.m_cell_a_boundary_tension_parameter, 0.12);
             TS_ASSERT_EQUALS(param.m_cell_a_g1_duration, 30.0);
             TS_ASSERT_EQUALS(param.m_cell_a_g2_duration, 70.0);
-            TS_ASSERT_EQUALS(param.m_cell_a_max_generations, 3);
+            TS_ASSERT_EQUALS(param.m_cell_a_max_generations, static_cast<unsigned>(-1));
 
             TS_ASSERT_EQUALS(param.m_cell_b_target_area, 1.0);
             TS_ASSERT_EQUALS(param.m_cell_b_elasticity_parameter, 1.0);
@@ -51,7 +51,7 @@ class TestCellCompetitionParameters : public CxxTest::TestSuite
             TS_ASSERT_EQUALS(param.m_cell_b_boundary_tension_parameter, 0.12);
             TS_ASSERT_EQUALS(param.m_cell_b_g1_duration, 30.0);
             TS_ASSERT_EQUALS(param.m_cell_b_g2_duration, 70.0);
-            TS_ASSERT_EQUALS(param.m_cell_b_max_generations, 3);
+            TS_ASSERT_EQUALS(param.m_cell_b_max_generations, static_cast<unsigned>(-1));
         }
 
         void TestCellCompetitionParametersUpdate1()
