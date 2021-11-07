@@ -1,0 +1,1293 @@
+From f697cd2072cc52e330ae82230fee6c2bad460bed Mon Sep 17 00:00:00 2001
+From: Thomas Pak <thomas.pak@linacre.ox.ac.uk>
+Date: Mon, 21 Jun 2021 17:56:02 +0100
+Subject: [PATCH 1/8] #3065 Implement mCheckForT3Swaps
+
+---
+ mesh/src/vertex/MutableVertexMesh.cpp | 21 ++++++++++++++++++---
+ mesh/src/vertex/MutableVertexMesh.hpp | 16 ++++++++++++++++
+ 2 files changed, 34 insertions(+), 3 deletions(-)
+
+diff --git a/mesh/src/vertex/MutableVertexMesh.cpp b/mesh/src/vertex/MutableVertexMesh.cpp
+index 554ee2c60..2deb2d4f4 100644
+--- a/mesh/src/vertex/MutableVertexMesh.cpp
++++ b/mesh/src/vertex/MutableVertexMesh.cpp
+@@ -55,6 +55,7 @@ MutableVertexMesh<ELEMENT_DIM, SPACE_DIM>::MutableVertexMesh(std::vector<Node<SP
+           mProtorosetteResolutionProbabilityPerTimestep(protorosetteResolutionProbabilityPerTimestep),
+           mRosetteResolutionProbabilityPerTimestep(rosetteResolutionProbabilityPerTimestep),
+           mCheckForInternalIntersections(false),
++          mCheckForT3Swaps(true),
+           mDistanceForT3SwapChecking(5.0)
+ {
+     // Threshold parameters must be strictly positive
+@@ -129,6 +130,7 @@ MutableVertexMesh<ELEMENT_DIM, SPACE_DIM>::MutableVertexMesh()
+       mProtorosetteResolutionProbabilityPerTimestep(0.0),
+       mRosetteResolutionProbabilityPerTimestep(0.0),
+       mCheckForInternalIntersections(false),
++      mCheckForT3Swaps(true),
+       mDistanceForT3SwapChecking(5.0)
+ {
+     // Note that the member variables initialised above will be overwritten as soon as archiving is complete
+@@ -198,6 +200,12 @@ bool MutableVertexMesh<ELEMENT_DIM, SPACE_DIM>::GetCheckForInternalIntersections
+     return mCheckForInternalIntersections;
+ }
+ 
++template<unsigned ELEMENT_DIM, unsigned SPACE_DIM>
++bool MutableVertexMesh<ELEMENT_DIM, SPACE_DIM>::GetCheckForT3Swaps() const
++{
++    return mCheckForT3Swaps;
++}
++
+ template<unsigned ELEMENT_DIM, unsigned SPACE_DIM>
+ void MutableVertexMesh<ELEMENT_DIM, SPACE_DIM>::SetCellRearrangementThreshold(double cellRearrangementThreshold)
+ {
+@@ -273,6 +281,12 @@ void MutableVertexMesh<ELEMENT_DIM, SPACE_DIM>::SetCheckForInternalIntersections
+     mCheckForInternalIntersections = checkForInternalIntersections;
+ }
+ 
++template<unsigned ELEMENT_DIM, unsigned SPACE_DIM>
++void MutableVertexMesh<ELEMENT_DIM, SPACE_DIM>::SetCheckForT3Swaps(bool checkForT3Swaps)
++{
++    mCheckForT3Swaps = checkForT3Swaps;
++}
++
+ template<unsigned ELEMENT_DIM, unsigned SPACE_DIM>
+ void MutableVertexMesh<ELEMENT_DIM, SPACE_DIM>::Clear()
+ {
+@@ -1027,7 +1041,7 @@ bool MutableVertexMesh<ELEMENT_DIM, SPACE_DIM>::CheckForT2Swaps(VertexElementMap
+ template<unsigned ELEMENT_DIM, unsigned SPACE_DIM>
+ bool MutableVertexMesh<ELEMENT_DIM, SPACE_DIM>::CheckForIntersections()
+ {
+-    // If checking for internal intersections as well as on the boundary, then check that no nodes have overlapped any elements...
++    // If checking for internal intersections, then check that no nodes have overlapped any elements...
+     if (mCheckForInternalIntersections)
+     {
+         // First neighbours are elements that contain the node.  Second
+@@ -1098,9 +1112,10 @@ bool MutableVertexMesh<ELEMENT_DIM, SPACE_DIM>::CheckForIntersections()
+             }
+         }
+     }
+-    else
++
++    if (mCheckForT3Swaps)
+     {
+-        // ...otherwise, just check that no boundary nodes have overlapped any boundary elements
++        // If checking for T3 swaps, check that no boundary nodes have overlapped any boundary elements
+         // First: find all boundary element and calculate their centroid only once
+         std::vector<unsigned> boundary_element_indices;
+         std::vector< c_vector<double, SPACE_DIM> > boundary_element_centroids;
+diff --git a/mesh/src/vertex/MutableVertexMesh.hpp b/mesh/src/vertex/MutableVertexMesh.hpp
+index 284dbd03d..16561e56d 100644
+--- a/mesh/src/vertex/MutableVertexMesh.hpp
++++ b/mesh/src/vertex/MutableVertexMesh.hpp
+@@ -94,6 +94,9 @@ protected:
+     /** Whether to check for edges intersections (true) or not (false). */
+     bool mCheckForInternalIntersections;
+ 
++    /** Whether to check for T3 swaps (true) or not (false). */
++    bool mCheckForT3Swaps;
++
+     /** Indices of nodes that have been deleted. These indices can be reused when adding new elements/nodes. */
+     std::vector<unsigned> mDeletedNodeIndices;
+ 
+@@ -353,6 +356,7 @@ protected:
+         archive & mDeletedNodeIndices;
+         archive & mDeletedElementIndices;
+         archive & mDistanceForT3SwapChecking;
++        archive & mCheckForT3Swaps;
+         ///\todo: maybe we should archive the mLocationsOfT1Swaps and mDeletedNodeIndices etc. as well?
+ 
+         archive & boost::serialization::base_object<VertexMesh<ELEMENT_DIM, SPACE_DIM> >(*this);
+@@ -452,6 +456,13 @@ public:
+      */
+     void SetCheckForInternalIntersections(bool checkForInternalIntersections);
+ 
++    /**
++     * Set method for mCheckForT3Swaps.
++     *
++     * @param checkForT3Swaps
++     */
++    void SetCheckForT3Swaps(bool checkForT3Swaps);
++
+     /**
+      * @return mCellRearrangementThreshold
+      */
+@@ -520,6 +531,11 @@ public:
+      */
+     bool GetCheckForInternalIntersections() const;
+ 
++    /**
++     * @return mCheckForT3Swaps, either to check for T3 swaps or not.
++     */
++    bool GetCheckForT3Swaps() const;
++
+     /**
+      * @return the locations of the T1 swaps
+      */
+-- 
+2.25.1
+
+
+From b35ec06cc0bb20770e68a4736ea686f55750a5f7 Mon Sep 17 00:00:00 2001
+From: Thomas Pak <thomas.pak@linacre.ox.ac.uk>
+Date: Mon, 21 Jun 2021 18:05:20 +0100
+Subject: [PATCH 2/8] Test mCheckForT3Swaps
+
+---
+ mesh/test/vertex/TestMutableVertexMeshReMesh.hpp | 7 +++++++
+ 1 file changed, 7 insertions(+)
+
+diff --git a/mesh/test/vertex/TestMutableVertexMeshReMesh.hpp b/mesh/test/vertex/TestMutableVertexMeshReMesh.hpp
+index 69e906a6b..3e6166754 100644
+--- a/mesh/test/vertex/TestMutableVertexMeshReMesh.hpp
++++ b/mesh/test/vertex/TestMutableVertexMeshReMesh.hpp
+@@ -1530,6 +1530,13 @@ public:
+ 
+         MutableVertexMesh<2,2> mesh(nodes, elements);
+ 
++        // Test default value of mCheckForT3Swaps, as well as setting and getting
++        TS_ASSERT_EQUALS(mesh.GetCheckForT3Swaps(), true);
++        mesh.SetCheckForT3Swaps(false);
++        TS_ASSERT_EQUALS(mesh.GetCheckForT3Swaps(), false);
++        mesh.SetCheckForT3Swaps(true);
++        TS_ASSERT_EQUALS(mesh.GetCheckForT3Swaps(), true);
++
+         // Set the threshold distance between vertices for a T3 swap as follows, to ease calculations
+         mesh.SetCellRearrangementThreshold(0.1*1.0/1.5);
+ 
+-- 
+2.25.1
+
+
+From 416d7a75ce915bc08f69d9ddb48239341197542a Mon Sep 17 00:00:00 2001
+From: Thomas Pak <thomas.pak@linacre.ox.ac.uk>
+Date: Mon, 12 Jul 2021 22:13:55 +0100
+Subject: [PATCH 3/8] Test boundary triangles
+
+---
+ .../vertex/TestMutableVertexMeshReMesh.hpp    | 143 ++++++++++++++++++
+ 1 file changed, 143 insertions(+)
+
+diff --git a/mesh/test/vertex/TestMutableVertexMeshReMesh.hpp b/mesh/test/vertex/TestMutableVertexMeshReMesh.hpp
+index 3e6166754..6fa49512b 100644
+--- a/mesh/test/vertex/TestMutableVertexMeshReMesh.hpp
++++ b/mesh/test/vertex/TestMutableVertexMeshReMesh.hpp
+@@ -1028,6 +1028,149 @@ public:
+                 "dealing with this has not been implemented yet" );
+     }
+ 
++    void TestAdHocFixForBoundaryTriangles()
++    {
++        // Make 6 nodes to assign to four elements
++        std::vector<Node<2>*> nodes;
++        nodes.push_back(new Node<2>(0, true, 0.0, 0.0));
++        nodes.push_back(new Node<2>(1, true, 1.0, 0.0));
++        nodes.push_back(new Node<2>(2, true, 0.5, 0.5));
++        nodes.push_back(new Node<2>(3, false, 0.4, 0.25));
++        nodes.push_back(new Node<2>(4, true, 0.6, 0.25));
++        nodes.push_back(new Node<2>(5, false, 0.5, 0.3));
++
++        // Make two triangles and two trapezium elements out of these nodes
++        std::vector<Node<2>*> nodes_elem_0, nodes_elem_1, nodes_elem_2, nodes_elem_3;
++        unsigned node_indices_elem_0[3] = {3, 4, 5};
++        unsigned node_indices_elem_1[3] = {2, 5, 4};
++        unsigned node_indices_elem_2[4] = {2, 0, 3, 5};
++        unsigned node_indices_elem_3[4] = {0, 1, 4, 3};
++        for (unsigned i=0; i<4; i++)
++        {
++            if (i < 3)
++            {
++                nodes_elem_0.push_back(nodes[node_indices_elem_0[i]]);
++                nodes_elem_1.push_back(nodes[node_indices_elem_1[i]]);
++            }
++            nodes_elem_2.push_back(nodes[node_indices_elem_2[i]]);
++            nodes_elem_3.push_back(nodes[node_indices_elem_3[i]]);
++        }
++
++        std::vector<VertexElement<2,2>*> vertex_elements;
++        vertex_elements.push_back(new VertexElement<2,2>(0, nodes_elem_0));
++        vertex_elements.push_back(new VertexElement<2,2>(1, nodes_elem_1));
++        vertex_elements.push_back(new VertexElement<2,2>(2, nodes_elem_2));
++        vertex_elements.push_back(new VertexElement<2,2>(3, nodes_elem_3));
++
++        MutableVertexMesh<2,2> vertex_mesh(nodes, vertex_elements, 0.1);
++
++        // Set the threshold distance between vertices for a T1 swap as follows, to ease calculations
++        vertex_mesh.SetCellRearrangementThreshold(0.1);
++
++        TS_ASSERT_EQUALS(vertex_mesh.GetNumElements(), 4u);
++
++        // Perform a T2 swap on the boundary triangle element
++        VertexElement<2,2>* p_element_1 = vertex_mesh.GetElement(1);
++        c_vector<double, 2> centroid_of_element_1_before_swap = vertex_mesh.GetCentroidOfElement(1);
++        vertex_mesh.PerformT2Swap(*p_element_1);
++
++        TS_ASSERT_EQUALS(vertex_mesh.GetNumElements(), 3u);
++        TS_ASSERT_EQUALS(vertex_mesh.GetNumNodes(), 6u);
++
++        TS_ASSERT_EQUALS(vertex_mesh.GetNumAllElements(), 4u);
++        TS_ASSERT_EQUALS(vertex_mesh.GetNumAllNodes(), 6u);
++
++        for (unsigned i=0; i<4; i++)
++        {
++            if (i < 3)
++            {
++                TS_ASSERT_EQUALS(vertex_mesh.GetElement(0)->GetNodeGlobalIndex(i), node_indices_elem_0[i]);
++            }
++            TS_ASSERT_EQUALS(vertex_mesh.GetElement(2)->GetNodeGlobalIndex(i), node_indices_elem_2[i]);
++            TS_ASSERT_EQUALS(vertex_mesh.GetElement(3)->GetNodeGlobalIndex(i), node_indices_elem_3[i]);
++        }
++
++        // Test boundary property of nodes. All are boundary nodes except node 3.
++        for (unsigned i=0; i<vertex_mesh.GetNumNodes(); i++)
++        {
++            bool expected_boundary_node = (i!=3);
++            TS_ASSERT_EQUALS(vertex_mesh.GetNode(i)->IsBoundaryNode(), expected_boundary_node);
++        }
++
++        // Test the tracking of the T2 swap location:
++        TS_ASSERT_DELTA(vertex_mesh.GetLastT2SwapLocation()[0], centroid_of_element_1_before_swap[0], 1e-10);
++        TS_ASSERT_DELTA(vertex_mesh.GetLastT2SwapLocation()[1], centroid_of_element_1_before_swap[1], 1e-10);
++    }
++
++    void TestAdHocFixForBoundaryTriangles2()
++    {
++        // Make 6 nodes to assign to three elements
++        std::vector<Node<2>*> nodes;
++        nodes.push_back(new Node<2>(0, true, 0.0, 0.0));
++        nodes.push_back(new Node<2>(1, true, 1.0, 0.0));
++        nodes.push_back(new Node<2>(2, true, 0.5, 0.5));
++        nodes.push_back(new Node<2>(3, true, 0.4, 0.25));
++        nodes.push_back(new Node<2>(4, true, 0.6, 0.25));
++        nodes.push_back(new Node<2>(5, true, 0.5, 0.3));
++
++        // Make two triangles and one trapezium elements out of these nodes
++        std::vector<Node<2>*> nodes_elem_0, nodes_elem_1, nodes_elem_2;
++        unsigned node_indices_elem_0[3] = {3, 4, 5};
++        unsigned node_indices_elem_1[3] = {2, 5, 4};
++        unsigned node_indices_elem_2[4] = {0, 1, 4, 3};
++        for (unsigned i=0; i<4; i++)
++        {
++            if (i < 3)
++            {
++                nodes_elem_0.push_back(nodes[node_indices_elem_0[i]]);
++                nodes_elem_1.push_back(nodes[node_indices_elem_1[i]]);
++            }
++            nodes_elem_2.push_back(nodes[node_indices_elem_2[i]]);
++        }
++
++        std::vector<VertexElement<2,2>*> vertex_elements;
++        vertex_elements.push_back(new VertexElement<2,2>(0, nodes_elem_0));
++        vertex_elements.push_back(new VertexElement<2,2>(1, nodes_elem_1));
++        vertex_elements.push_back(new VertexElement<2,2>(2, nodes_elem_2));
++
++        MutableVertexMesh<2,2> vertex_mesh(nodes, vertex_elements, 0.1);
++
++        // Set the threshold distance between vertices for a T1 swap as follows, to ease calculations
++        vertex_mesh.SetCellRearrangementThreshold(0.1);
++
++        TS_ASSERT_EQUALS(vertex_mesh.GetNumElements(), 3u);
++
++        // Perform a T2 swap on the boundary triangle element
++        VertexElement<2,2>* p_element_1 = vertex_mesh.GetElement(1);
++        c_vector<double, 2> centroid_of_element_1_before_swap = vertex_mesh.GetCentroidOfElement(1);
++        vertex_mesh.PerformT2Swap(*p_element_1);
++
++        TS_ASSERT_EQUALS(vertex_mesh.GetNumElements(), 2u);
++        TS_ASSERT_EQUALS(vertex_mesh.GetNumNodes(), 5u);
++
++        TS_ASSERT_EQUALS(vertex_mesh.GetNumAllElements(), 3u);
++        TS_ASSERT_EQUALS(vertex_mesh.GetNumAllNodes(), 6u);
++
++        for (unsigned i=0; i<4; i++)
++        {
++            if (i < 3)
++            {
++                TS_ASSERT_EQUALS(vertex_mesh.GetElement(0)->GetNodeGlobalIndex(i), node_indices_elem_0[i]);
++            }
++            TS_ASSERT_EQUALS(vertex_mesh.GetElement(2)->GetNodeGlobalIndex(i), node_indices_elem_2[i]);
++        }
++
++        // Test boundary property of nodes. All are boundary nodes except node 3.
++        for (unsigned i=0; i<vertex_mesh.GetNumNodes(); i++)
++        {
++            TS_ASSERT_EQUALS(vertex_mesh.GetNode(i)->IsBoundaryNode(), true);
++        }
++
++        // Test the tracking of the T2 swap location:
++        TS_ASSERT_DELTA(vertex_mesh.GetLastT2SwapLocation()[0], centroid_of_element_1_before_swap[0], 1e-10);
++        TS_ASSERT_DELTA(vertex_mesh.GetLastT2SwapLocation()[1], centroid_of_element_1_before_swap[1], 1e-10);
++    }
++
+     void TestPerformT2SwapWithRosettes()
+     {
+         /* Create a mesh containing a smaller triangular element, each of whose nodes are
+-- 
+2.25.1
+
+
+From 5a3714fbf3eb19927ec99524430bdfa063307531 Mon Sep 17 00:00:00 2001
+From: Thomas Pak <thomas.pak@linacre.ox.ac.uk>
+Date: Mon, 12 Jul 2021 22:14:06 +0100
+Subject: [PATCH 4/8] Ad hoc fix for boundary triangles
+
+---
+ mesh/src/vertex/MutableVertexMesh.cpp | 61 +++++++++++++++++++++++++++
+ 1 file changed, 61 insertions(+)
+
+diff --git a/mesh/src/vertex/MutableVertexMesh.cpp b/mesh/src/vertex/MutableVertexMesh.cpp
+index 2deb2d4f4..b8334fdae 100644
+--- a/mesh/src/vertex/MutableVertexMesh.cpp
++++ b/mesh/src/vertex/MutableVertexMesh.cpp
+@@ -2031,6 +2031,67 @@ void MutableVertexMesh<ELEMENT_DIM, SPACE_DIM>::PerformT2Swap(VertexElement<ELEM
+         return;
+     }
+ 
++    // Fix for triangular neighbours
++    unsigned num_boundary_nodes = 0;
++    for (unsigned i=0; i<3; i++)
++    {
++        if (rElement.GetNode(i)->IsBoundaryNode())
++        {
++            ++num_boundary_nodes;
++        }
++    }
++
++    // Current element is on the boundary
++    if (num_boundary_nodes >= 2)
++    {
++        // Find all neighbours
++        std::set<unsigned> all_neighbours;
++
++        for (unsigned i=0; i<3; i++)
++        {
++            auto p_node = rElement.GetNode(i);
++            auto containing_elements = p_node->rGetContainingElementIndices();
++
++            std::set<unsigned> temp_union_set;
++            std::set_union(containing_elements.begin(), containing_elements.end(),
++                           all_neighbours.begin(), all_neighbours.end(),
++                           std::inserter(temp_union_set, temp_union_set.begin()));
++            all_neighbours.swap(temp_union_set);
++        }
++
++        all_neighbours.erase(rElement.GetIndex());
++
++        // For each of these neighbouring elements
++        for (auto elem_iter = all_neighbours.begin(); elem_iter != all_neighbours.end(); ++elem_iter)
++        {
++            auto p_this_elem = this->GetElement(*elem_iter);
++
++            // If neighbour is triangular, then delete element, mark boundary nodes and exit
++            if (p_this_elem->GetNumNodes() < 4)
++            {
++                assert(p_this_elem->GetNumNodes() == 3);
++
++                for (unsigned i=0; i<3; i++)
++                {
++                    if (rElement.GetNode(i)->GetNumContainingElements() == 1)
++                    {
++                        mDeletedNodeIndices.push_back(rElement.GetNodeGlobalIndex(i));
++                        rElement.GetNode(i)->MarkAsDeleted();
++                    }
++                    else
++                    {
++                        rElement.GetNode(i)->SetAsBoundaryNode(true);
++                    }
++                }
++
++                mDeletedElementIndices.push_back(rElement.GetIndex());
++                rElement.MarkAsDeleted();
++
++                return;
++            }
++        }
++    }
++
+     // Create a new node at the element's centroid; this will be a boundary node if any existing nodes were on the boundary
+     bool is_node_on_boundary = false;
+     for (unsigned i=0; i<3; i++)
+-- 
+2.25.1
+
+
+From 2f473288d8b26bc8854d623fac2039604ea397ec Mon Sep 17 00:00:00 2001
+From: Thomas Pak <thomas.pak@linacre.ox.ac.uk>
+Date: Mon, 12 Jul 2021 22:21:37 +0100
+Subject: [PATCH 5/8] Test line removal
+
+---
+ .../vertex/TestMutableVertexMeshReMesh.hpp    | 180 ++++++------------
+ 1 file changed, 59 insertions(+), 121 deletions(-)
+
+diff --git a/mesh/test/vertex/TestMutableVertexMeshReMesh.hpp b/mesh/test/vertex/TestMutableVertexMeshReMesh.hpp
+index 6fa49512b..e9de5420d 100644
+--- a/mesh/test/vertex/TestMutableVertexMeshReMesh.hpp
++++ b/mesh/test/vertex/TestMutableVertexMeshReMesh.hpp
+@@ -3190,127 +3190,6 @@ public:
+         TS_ASSERT_DELTA(vertex_mesh.GetSurfaceAreaOfElement(3), 2.3062, 1e-4);
+     }
+ 
+-    void TestPerformIntersectionSwapTriangle()
+-    {
+-        /*
+-         * This test is very similar to TestPerformIntersectionSwap() but the intersected
+-         * element is a triangle element, to ensure that this exception is caught.
+-         *
+-         * The mesh is as follows:
+-         *
+-         *   _____________
+-         *   \           /|
+-         *    \\    0   / |
+-         *     \3\     /  |
+-         *      \  \  /   |
+-         *        ---   1 |
+-         *      /  \      |
+-         *     /     \    |
+-         *    /   2    \  |
+-         *   /___________\|
+-         */
+-        std::vector<Node<2>*> nodes;
+-        nodes.push_back(new Node<2>(0, true,  0.0, 0.0));
+-        nodes.push_back(new Node<2>(1, true,  1.0, 0.0));
+-        nodes.push_back(new Node<2>(2, true,  1.0, 1.0));
+-        nodes.push_back(new Node<2>(3, true,  0.0, 1.0));
+-        nodes.push_back(new Node<2>(4, true, 0.4, 0.5));
+-        nodes.push_back(new Node<2>(5, false, 0.6, 0.5));
+-
+-        std::vector<Node<2>*> nodes_elem_0, nodes_elem_1, nodes_elem_2, nodes_elem_3;
+-        unsigned node_indices_elem_0[3] = {2, 3, 5};
+-        unsigned node_indices_elem_1[4] = {2, 5, 4, 1};
+-        unsigned node_indices_elem_2[3] = {1, 4, 0};
+-        unsigned node_indices_elem_3[4] = {4, 5, 3};
+-        for (unsigned i=0; i<3; i++)
+-        {
+-            nodes_elem_0.push_back(nodes[node_indices_elem_0[i]]);
+-            nodes_elem_2.push_back(nodes[node_indices_elem_2[i]]);
+-            nodes_elem_1.push_back(nodes[node_indices_elem_1[i]]);
+-            nodes_elem_3.push_back(nodes[node_indices_elem_3[i]]);
+-        }
+-        nodes_elem_1.push_back(nodes[node_indices_elem_1[3]]);
+-
+-        std::vector<VertexElement<2,2>*> vertex_elements;
+-        vertex_elements.push_back(new VertexElement<2,2>(0, nodes_elem_0));
+-        vertex_elements.push_back(new VertexElement<2,2>(1, nodes_elem_1));
+-        vertex_elements.push_back(new VertexElement<2,2>(2, nodes_elem_2));
+-        vertex_elements.push_back(new VertexElement<2,2>(3, nodes_elem_3));
+-
+-        MutableVertexMesh<2,2> vertex_mesh(nodes, vertex_elements);
+-
+-        // Move node 4 so that it overlaps element 0
+-        ChastePoint<2> point = vertex_mesh.GetNode(4)->GetPoint();
+-        point.SetCoordinate(1u, 0.7);
+-        vertex_mesh.SetNode(4, point);
+-
+-        // Merge intersection to maintain non-overlapping elements
+-        vertex_mesh.SetCheckForInternalIntersections(true);
+-        TS_ASSERT_EQUALS(vertex_mesh.GetCheckForInternalIntersections(), true);
+-        TS_ASSERT_THROWS_THIS(vertex_mesh.CheckForIntersections(), "A triangular element has become concave. "
+-                "You need to rerun the simulation with a smaller time step to prevent this.");
+-    }
+-
+-    void TestPerformIntersectionSwapTriangleOtherWayRound()
+-    {
+-        /*
+-         * This test is very similar to TestPerformIntersectionSwapTriangle() but the intersected
+-         * element is a triangle element, to ensure that this exception is caught.
+-         *
+-         * The mesh is as follows:
+-         *
+-         *   _____________
+-         *  |\           /
+-         *  | \    0   //
+-         *  |  \     /3/
+-         *  |   \  /  /
+-         *  | 1   ---
+-         *  |      /  \
+-         *  |    /     \
+-         *  |  /   2    \
+-         *  |/___________\
+-         */
+-        std::vector<Node<2>*> nodes;
+-        nodes.push_back(new Node<2>(0, true,  0.0, 0.0));
+-        nodes.push_back(new Node<2>(1, true,  1.0, 0.0));
+-        nodes.push_back(new Node<2>(2, true,  1.0, 1.0));
+-        nodes.push_back(new Node<2>(3, true,  0.0, 1.0));
+-        nodes.push_back(new Node<2>(4, false, 0.4, 0.5));
+-        nodes.push_back(new Node<2>(5, true, 0.6, 0.5));
+-
+-        std::vector<Node<2>*> nodes_elem_0, nodes_elem_1, nodes_elem_2, nodes_elem_3;
+-        unsigned node_indices_elem_0[3] = {2, 3, 4};
+-        unsigned node_indices_elem_1[4] = {0, 5, 4, 3};
+-        unsigned node_indices_elem_2[3] = {1, 5, 0};
+-        unsigned node_indices_elem_3[4] = {2, 4, 5};
+-        for (unsigned i=0; i<3; i++)
+-        {
+-            nodes_elem_0.push_back(nodes[node_indices_elem_0[i]]);
+-            nodes_elem_2.push_back(nodes[node_indices_elem_2[i]]);
+-            nodes_elem_1.push_back(nodes[node_indices_elem_1[i]]);
+-            nodes_elem_3.push_back(nodes[node_indices_elem_3[i]]);
+-        }
+-        nodes_elem_1.push_back(nodes[node_indices_elem_1[3]]);
+-
+-        std::vector<VertexElement<2,2>*> vertex_elements;
+-        vertex_elements.push_back(new VertexElement<2,2>(0, nodes_elem_0));
+-        vertex_elements.push_back(new VertexElement<2,2>(1, nodes_elem_1));
+-        vertex_elements.push_back(new VertexElement<2,2>(2, nodes_elem_2));
+-        vertex_elements.push_back(new VertexElement<2,2>(3, nodes_elem_3));
+-
+-        MutableVertexMesh<2,2> vertex_mesh(nodes, vertex_elements);
+-
+-        // Move node 5 so that it overlaps element 0
+-        ChastePoint<2> point = vertex_mesh.GetNode(5)->GetPoint();
+-        point.SetCoordinate(1u, 0.7);
+-        vertex_mesh.SetNode(5, point);
+-
+-        // Merge intersection to maintain non-overlapping elements
+-        vertex_mesh.SetCheckForInternalIntersections(true);
+-        TS_ASSERT_THROWS_THIS(vertex_mesh.CheckForIntersections(), "A triangular element has become concave. "
+-                "You need to rerun the simulation with a smaller time step to prevent this.");
+-    }
+-
+     void TestPerformIntersectionSwapSplitting()
+     {
+         /*
+@@ -4277,6 +4156,65 @@ public:
+         TS_ASSERT_DELTA(vertex_mesh.GetSurfaceAreaOfElement(0), 2.4232, 1e-4);
+         TS_ASSERT_DELTA(vertex_mesh.GetSurfaceAreaOfElement(1), 2.3062, 1e-4);
+     }
++
++    void TestPerformLineRemoval()
++    {
++        /*
++         * Create a mesh comprising four nodes contained in one triangular and
++         * one linear elements.  We will test that a line removal is resolved
++         * correctly.
++         */
++        std::vector<Node<2>*> nodes;
++        nodes.push_back(new Node<2>(0, true,  0.0, 0.0));
++        nodes.push_back(new Node<2>(1, true,  1.0, 0.0));
++        nodes.push_back(new Node<2>(2, true,  0.5, 0.5));
++        nodes.push_back(new Node<2>(3, true,  0.3, 0.3));
++
++        std::vector<Node<2>*> nodes_elem_0, nodes_elem_1;
++        unsigned node_indices_elem_0[4] = {0, 1, 2, 3};
++        unsigned node_indices_elem_1[2] = {2, 3};
++        for (unsigned i=0; i<4; i++)
++        {
++            if (i < 2)
++            {
++                nodes_elem_1.push_back(nodes[node_indices_elem_1[i]]);
++            }
++            nodes_elem_0.push_back(nodes[node_indices_elem_0[i]]);
++        }
++
++        std::vector<VertexElement<2,2>*> vertex_elements;
++        vertex_elements.push_back(new VertexElement<2,2>(0, nodes_elem_0));
++        vertex_elements.push_back(new VertexElement<2,2>(1, nodes_elem_1));
++
++        MutableVertexMesh<2,2> vertex_mesh(nodes, vertex_elements);
++
++        // Perform a line removal on the linear element
++        VertexElement<2,2>* p_element_1 = vertex_mesh.GetElement(1);
++        vertex_mesh.PerformT2Swap(*p_element_1);
++
++        TS_ASSERT_EQUALS(vertex_mesh.GetNumElements(), 1u);
++        TS_ASSERT_EQUALS(vertex_mesh.GetNumNodes(), 4u);
++
++        TS_ASSERT_EQUALS(vertex_mesh.GetNumAllElements(), 2u);
++        TS_ASSERT_EQUALS(vertex_mesh.GetNumAllNodes(), 4u);
++
++        // Test that each element contains the correct nodes following the rearrangement
++        unsigned node_indices_element_1[4] = {0, 1, 2, 3};
++        for (unsigned i=0; i<4; i++)
++        {
++            TS_ASSERT_EQUALS(vertex_mesh.GetElement(0)->GetNodeGlobalIndex(i), node_indices_element_1[i]);
++        }
++
++        // Test boundary property of nodes. All are boundary nodes
++        for (unsigned i=0; i<vertex_mesh.GetNumNodes(); i++)
++        {
++            TS_ASSERT_EQUALS(vertex_mesh.GetNode(i)->IsBoundaryNode(), true);
++        }
++
++        // Test the tracking of the line removal location:
++        TS_ASSERT_DELTA(vertex_mesh.GetLastT2SwapLocation()[0], 0.4, 1e-10);
++        TS_ASSERT_DELTA(vertex_mesh.GetLastT2SwapLocation()[1], 0.4, 1e-10);
++    }
+ };
+ 
+ #endif /*TESTMUTABLEVERTEXMESHREMESH_HPP_*/
+-- 
+2.25.1
+
+
+From 49aef6d7e6a02e129c98f6eb1bef48cfeea0716f Mon Sep 17 00:00:00 2001
+From: Thomas Pak <thomas.pak@linacre.ox.ac.uk>
+Date: Mon, 12 Jul 2021 22:21:48 +0100
+Subject: [PATCH 6/8] Implement line removal
+
+---
+ mesh/src/vertex/MutableVertexMesh.cpp | 17 ++++++++++++++++-
+ 1 file changed, 16 insertions(+), 1 deletion(-)
+
+diff --git a/mesh/src/vertex/MutableVertexMesh.cpp b/mesh/src/vertex/MutableVertexMesh.cpp
+index b8334fdae..45c8f5605 100644
+--- a/mesh/src/vertex/MutableVertexMesh.cpp
++++ b/mesh/src/vertex/MutableVertexMesh.cpp
+@@ -2007,7 +2007,22 @@ template<unsigned ELEMENT_DIM, unsigned SPACE_DIM>
+ void MutableVertexMesh<ELEMENT_DIM, SPACE_DIM>::PerformT2Swap(VertexElement<ELEMENT_DIM,SPACE_DIM>& rElement)
+ {
+     // The given element must be triangular for us to be able to perform a T2 swap on it
+-    assert(rElement.GetNumNodes() == 3);
++    assert((rElement.GetNumNodes() == 3) || (rElement.GetNumNodes() == 2));
++
++    if (rElement.GetNumNodes() == 2)
++    {
++        // Note that we define this vector before setting it, as otherwise the profiling build will break (see #2367)
++        c_vector<double, SPACE_DIM> node_0_location, node_1_location;
++        node_0_location = rElement.GetNodeLocation(0);
++        node_1_location = rElement.GetNodeLocation(1);
++        mLastT2SwapLocation = 0.5 * (node_0_location + node_1_location);
++
++        // We also have to mark pElement as deleted
++        mDeletedElementIndices.push_back(rElement.GetIndex());
++        rElement.MarkAsDeleted();
++
++        return;
++    }
+ 
+     // Note that we define this vector before setting it, as otherwise the profiling build will break (see #2367)
+     c_vector<double, SPACE_DIM> new_node_location;
+-- 
+2.25.1
+
+
+From 7378f995a28487155b11f2d2816b4bb4a8550111 Mon Sep 17 00:00:00 2001
+From: Thomas Pak <thomas.pak@linacre.ox.ac.uk>
+Date: Mon, 12 Jul 2021 22:44:20 +0100
+Subject: [PATCH 7/8] Test line removal as T2 swap
+
+---
+ cell_based/test/ContinuousTestPack.txt        |   1 +
+ .../population/TestLineRemovalCellKiller.hpp  | 527 ++++++++++++++++++
+ 2 files changed, 528 insertions(+)
+ create mode 100644 cell_based/test/population/TestLineRemovalCellKiller.hpp
+
+diff --git a/cell_based/test/ContinuousTestPack.txt b/cell_based/test/ContinuousTestPack.txt
+index 53ed9b680..3b64b5ecc 100644
+--- a/cell_based/test/ContinuousTestPack.txt
++++ b/cell_based/test/ContinuousTestPack.txt
+@@ -58,6 +58,7 @@ population/TestPeriodicNodeBasedCellPopulationParallelMethods.hpp
+ population/TestPottsBasedCellPopulation.hpp
+ population/TestPottsUpdateRules.hpp
+ population/TestT2SwapCellKiller.hpp
++population/TestLineRemovalCellKiller.hpp
+ population/TestVertexBasedCellPopulation.hpp
+ population/TestVertexBasedDivisionRules.hpp
+ simulation/TestDeltaNotchModifier.hpp
+diff --git a/cell_based/test/population/TestLineRemovalCellKiller.hpp b/cell_based/test/population/TestLineRemovalCellKiller.hpp
+new file mode 100644
+index 000000000..f1d4c3486
+--- /dev/null
++++ b/cell_based/test/population/TestLineRemovalCellKiller.hpp
+@@ -0,0 +1,527 @@
++/*
++
++Copyright (c) 2005-2021, University of Oxford.
++All rights reserved.
++
++University of Oxford means the Chancellor, Masters and Scholars of the
++University of Oxford, having an administrative office at Wellington
++Square, Oxford OX1 2JD, UK.
++
++This file is part of Chaste.
++
++Redistribution and use in source and binary forms, with or without
++modification, are permitted provided that the following conditions are met:
++ * Redistributions of source code must retain the above copyright notice,
++   this list of conditions and the following disclaimer.
++ * Redistributions in binary form must reproduce the above copyright notice,
++   this list of conditions and the following disclaimer in the documentation
++   and/or other materials provided with the distribution.
++ * Neither the name of the University of Oxford nor the names of its
++   contributors may be used to endorse or promote products derived from this
++   software without specific prior written permission.
++
++THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
++AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
++IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
++ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE
++LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR
++CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE
++GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION)
++HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT
++LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT
++OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
++
++*/
++
++#ifndef TESTLINEREMOVALCELLKILLER_HPP_
++#define TESTLINEREMOVALCELLKILLER_HPP_
++
++#include <cxxtest/TestSuite.h>
++#include "CheckpointArchiveTypes.hpp"
++#include "ArchiveOpener.hpp"
++#include "CellsGenerator.hpp"
++#include "FixedG1GenerationalCellCycleModel.hpp"
++#include "VertexMeshWriter.hpp"
++#include "VertexBasedCellPopulation.hpp"
++#include "T2SwapCellKiller.hpp"
++#include "OffLatticeSimulation.hpp"
++#include "FileComparison.hpp"
++#include "AbstractCellBasedTestSuite.hpp"
++#include "Warnings.hpp"
++#include "HoneycombMeshGenerator.hpp"
++#include "MeshBasedCellPopulation.hpp"
++#include "HoneycombVertexMeshGenerator.hpp"
++#include "SmartPointers.hpp"
++#include "DifferentiatedCellProliferativeType.hpp"
++
++#include "FakePetscSetup.hpp"
++
++/**
++ * This class contains tests for the cell killer that performs line removals.
++ */
++class TestLineRemovalCellKiller : public AbstractCellBasedTestSuite
++{
++public:
++
++    /**
++     * This tests the the killer method CheckAndLabelCellsForApoptosisOrDeath()
++     * method for performing line removals (element removal).
++     */
++    void TestKillerForLineRemoval()
++    {
++        // Make 4 nodes to assign to two elements
++        std::vector<Node<2>*> nodes;
++        nodes.push_back(new Node<2>(0, true,  0.0, 0.0));
++        nodes.push_back(new Node<2>(1, true,  1.0, 0.0));
++        nodes.push_back(new Node<2>(2, true,  0.5, 0.5));
++        nodes.push_back(new Node<2>(3, true,  0.3, 0.3));
++
++        // Make one linear and one triangular elements out of these nodes
++        std::vector<Node<2>*> nodes_elem_0, nodes_elem_1;
++        unsigned node_indices_elem_0[2] = {2, 3};
++        unsigned node_indices_elem_1[4] = {0, 1, 2, 3};
++        for (unsigned i=0; i<4; i++)
++        {
++            if (i < 2)
++            {
++                nodes_elem_0.push_back(nodes[node_indices_elem_0[i]]);
++            }
++            nodes_elem_1.push_back(nodes[node_indices_elem_1[i]]);
++        }
++
++        std::vector<VertexElement<2,2>*> vertex_elements;
++        vertex_elements.push_back(new VertexElement<2,2>(0, nodes_elem_0));
++        vertex_elements.push_back(new VertexElement<2,2>(1, nodes_elem_1));
++
++        MutableVertexMesh<2,2> vertex_mesh(nodes, vertex_elements);
++
++        TS_ASSERT_EQUALS(vertex_mesh.GetNumElements(), 2u);
++        TS_ASSERT_EQUALS(vertex_mesh.GetNumNodes(), 4u);
++
++        // Get a cell population
++        CellsGenerator<FixedG1GenerationalCellCycleModel, 2> cells_generator;
++        std::vector<CellPtr> cells;
++        cells_generator.GenerateBasic(cells, vertex_mesh.GetNumElements(), std::vector<unsigned>());
++        VertexBasedCellPopulation<2> cell_population(vertex_mesh, cells);
++
++        // The population should have 2 cells
++        TS_ASSERT_EQUALS(cell_population.GetNumRealCells(), 2u)
++
++        // Give the Population to the cell killer
++        T2SwapCellKiller<2> cell_killer(&cell_population);
++
++        // Perform swaps
++        cell_killer.CheckAndLabelCellsForApoptosisOrDeath();
++
++        TS_ASSERT_EQUALS(vertex_mesh.GetNumElements(), 1u);
++        TS_ASSERT_EQUALS(vertex_mesh.GetNumNodes(), 4u);
++
++        // Test tracking of line removals
++        std::vector< c_vector<double, 2> > line_locations = cell_population.GetLocationsOfT2Swaps();
++        std::vector< unsigned > line_cell_ids = cell_population.GetCellIdsOfT2Swaps();
++        TS_ASSERT_EQUALS(line_locations.size(), 1u);
++        TS_ASSERT_EQUALS(line_cell_ids.size(), 1u);
++        TS_ASSERT_EQUALS(line_cell_ids[0], 0u);
++        TS_ASSERT_DELTA(line_locations[0][0], 0.4, 1e-10);
++        TS_ASSERT_DELTA(line_locations[0][1], 0.4, 1e-10);
++
++        // Test line removal Location clearing
++        cell_population.ClearLocationsAndCellIdsOfT2Swaps();
++        line_locations = cell_population.GetLocationsOfT2Swaps();
++        line_cell_ids = cell_population.GetCellIdsOfT2Swaps();
++        TS_ASSERT_EQUALS(line_locations.size(), 0u);
++        TS_ASSERT_EQUALS(line_cell_ids.size(), 0u);
++
++        // Test that each element contains the correct number of nodes following the rearrangement
++        TS_ASSERT_EQUALS(vertex_mesh.GetElement(1)->GetNumNodes(), 4u);
++
++        // Test that each element contains the correct nodes following the rearrangement
++        // (note that the node indices are reset since element 0 was deleted from the mesh)
++        unsigned node_indices_element_1[4] = {0, 1, 2, 3};
++        for (unsigned i=0; i<3; i++)
++        {
++            TS_ASSERT_EQUALS(vertex_mesh.GetElement(1)->GetNodeGlobalIndex(i), node_indices_element_1[i]);
++        }
++
++        // Test that the cell corresponding to element 1 has been
++        // marked as deleted and the others haven't
++        TS_ASSERT(cell_population.GetCellUsingLocationIndex(0)->IsDead());
++        TS_ASSERT(!cell_population.GetCellUsingLocationIndex(1)->IsDead());
++
++        // We shouldn't have overseen any cells
++        TS_ASSERT_EQUALS(cell_population.rGetCells().size(), 2u);
++    }
++
++    void TestKillerForLineRemovalInSimulation()
++    {
++        /**
++         * This performs a single line removal in a simulation and tests that the cells and vertex elements are
++         * deleted correctly.
++         */
++        // Make 4 nodes to assign to two elements
++        std::vector<Node<2>*> nodes;
++        nodes.push_back(new Node<2>(0, true,  0.0, 0.0));
++        nodes.push_back(new Node<2>(1, true,  1.0, 0.0));
++        nodes.push_back(new Node<2>(2, true,  0.5, 0.5));
++        nodes.push_back(new Node<2>(3, true,  0.3, 0.3));
++
++        // Make one linear and one triangular elements out of these nodes
++        std::vector<Node<2>*> nodes_elem_0, nodes_elem_1;
++        unsigned node_indices_elem_0[2] = {2, 3};
++        unsigned node_indices_elem_1[4] = {0, 1, 2, 3};
++        for (unsigned i=0; i<4; i++)
++        {
++            if (i < 2)
++            {
++                nodes_elem_0.push_back(nodes[node_indices_elem_0[i]]);
++            }
++            nodes_elem_1.push_back(nodes[node_indices_elem_1[i]]);
++        }
++
++        std::vector<VertexElement<2,2>*> vertex_elements;
++        vertex_elements.push_back(new VertexElement<2,2>(0, nodes_elem_0));
++        vertex_elements.push_back(new VertexElement<2,2>(1, nodes_elem_1));
++
++        MutableVertexMesh<2,2> vertex_mesh(nodes, vertex_elements);
++
++        TS_ASSERT_EQUALS(vertex_mesh.GetNumElements(), 2u);
++        TS_ASSERT_EQUALS(vertex_mesh.GetNumNodes(), 4u);
++
++        // Get a cell population
++        CellsGenerator<FixedG1GenerationalCellCycleModel, 2> cells_generator;
++        std::vector<CellPtr> cells;
++        cells_generator.GenerateBasic(cells, vertex_mesh.GetNumElements(), std::vector<unsigned>());
++        VertexBasedCellPopulation<2> cell_population(vertex_mesh, cells);
++
++        // make a simulator
++        OffLatticeSimulation<2> simulator(cell_population);
++        simulator.SetOutputDirectory("TestT2SwapCellKillerLineRemovalInSimulation");
++        simulator.SetEndTime(0.005);
++
++        // Perform line removals
++        simulator.Solve();
++
++        TS_ASSERT_EQUALS(vertex_mesh.GetNumElements(), 1u);
++        TS_ASSERT_EQUALS(vertex_mesh.GetNumNodes(), 4u);
++
++        // Test that each element contains the correct number of nodes following the rearrangement
++        TS_ASSERT_EQUALS(vertex_mesh.GetElement(0)->GetNumNodes(), 4u);
++
++        // Test that each element contains the correct nodes following the rearrangement
++        // (note that the node indices are reset since element 0 was deleted from the mesh)
++        unsigned node_indices_element_0[4] = {0, 1, 2, 3};
++        for (unsigned i=0; i<3; i++)
++        {
++            TS_ASSERT_EQUALS(vertex_mesh.GetElement(0)->GetNodeGlobalIndex(i), node_indices_element_0[i]);
++        }
++
++        // Check that we have the right number of cells and that none of the cells are marked as dead
++        TS_ASSERT_EQUALS(cell_population.GetNumRealCells(), 1u)
++        TS_ASSERT(!cell_population.GetCellUsingLocationIndex(0)->IsDead());
++
++        // We also do not have any undeleted cells
++        TS_ASSERT_EQUALS(cell_population.rGetCells().size(), 1u);
++    }
++
++    void TestKillerForMultipleLineRemovals()
++    {
++        /**
++         * Create a mesh comprising five nodes contained in three elements, two
++         * of which are lines. We will test that the
++         * CheckAndLabelCellsForApoptosisOrDeath() method works correctly in
++         * the case where multiple line removals are required. After remeshing,
++         * the two linear elements should be removed from the mesh.
++         */
++        std::vector<Node<2>*> nodes;
++        // Create the nodes
++        // The boolean is true for boundary nodes
++        nodes.push_back(new Node<2>(0, true,  0.0, 0.0));
++        nodes.push_back(new Node<2>(1, true,  1.0, 0.0));
++        nodes.push_back(new Node<2>(2, true,  0.8, 0.2));
++        nodes.push_back(new Node<2>(3, true,  0.5, 0.5));
++        nodes.push_back(new Node<2>(4, true,  0.3, 0.3));
++
++        // Construct elements from the nodes
++        std::vector<Node<2>*> nodes_elem_0, nodes_elem_1, nodes_elem_2;
++        unsigned node_indices_elem_0[2] = {3, 4};
++        unsigned node_indices_elem_1[2] = {1, 2};
++        unsigned node_indices_elem_2[5] = {0, 1, 2, 3, 4};
++
++        for (unsigned i=0; i<5; i++)
++        {
++            nodes_elem_2.push_back(nodes[node_indices_elem_2[i]]);
++            if (i < 2)
++            {
++                nodes_elem_0.push_back(nodes[node_indices_elem_0[i]]);
++                nodes_elem_1.push_back(nodes[node_indices_elem_1[i]]);
++            }
++        }
++
++        // create a mesh
++        std::vector<VertexElement<2,2>*> vertex_elements;
++        vertex_elements.push_back(new VertexElement<2,2>(0, nodes_elem_0));
++        vertex_elements.push_back(new VertexElement<2,2>(1, nodes_elem_1));
++        vertex_elements.push_back(new VertexElement<2,2>(2, nodes_elem_2));
++
++        MutableVertexMesh<2,2> vertex_mesh(nodes, vertex_elements);
++
++        // Test that the numbers of nodes and elements are correct
++        TS_ASSERT_EQUALS(vertex_mesh.GetNumElements(), 3u);
++        TS_ASSERT_EQUALS(vertex_mesh.GetNumNodes(), 5u);
++
++        // Get a cell population
++        CellsGenerator<FixedG1GenerationalCellCycleModel, 2> cells_generator;
++        std::vector<CellPtr> cells;
++        cells_generator.GenerateBasic(cells, vertex_mesh.GetNumElements(), std::vector<unsigned>());
++        VertexBasedCellPopulation<2> cell_population(vertex_mesh, cells);
++
++        // the population should have 3 cells
++        TS_ASSERT_EQUALS(cell_population.GetNumRealCells(), 3u)
++
++        // ... and give it to the killer
++        T2SwapCellKiller<2> cell_killer(&cell_population);
++
++        // Perform swaps
++        cell_killer.CheckAndLabelCellsForApoptosisOrDeath();
++
++        // Test that after remeshing we have the correct number of nodes and elements
++        TS_ASSERT_EQUALS(vertex_mesh.GetNumElements(), 1u);
++        TS_ASSERT_EQUALS(vertex_mesh.GetNumNodes(), 5u);
++
++        // Test that after remeshing, each element contains the correct number of nodes
++        TS_ASSERT_EQUALS(vertex_mesh.GetElement(2)->GetNumNodes(), 5u);
++
++        // Test tracking of line removals
++        std::vector< c_vector<double, 2> > line_locations = cell_population.GetLocationsOfT2Swaps();
++        std::vector< unsigned > line_cell_ids = cell_population.GetCellIdsOfT2Swaps();
++        TS_ASSERT_EQUALS(line_locations.size(), 2u);
++        TS_ASSERT_EQUALS(line_cell_ids.size(), 2u);
++        TS_ASSERT_EQUALS(line_cell_ids[0], 0u);
++        TS_ASSERT_EQUALS(line_cell_ids[1], 1u);
++        TS_ASSERT_DELTA(line_locations[0][0], 0.4, 1e-10);
++        TS_ASSERT_DELTA(line_locations[0][1], 0.4, 1e-10);
++        TS_ASSERT_DELTA(line_locations[1][0], 0.9, 1e-10);
++        TS_ASSERT_DELTA(line_locations[1][1], 0.1, 1e-10);
++
++        // Test line removal Location clearing
++        cell_population.ClearLocationsAndCellIdsOfT2Swaps();
++        line_locations = cell_population.GetLocationsOfT2Swaps();
++        line_cell_ids = cell_population.GetCellIdsOfT2Swaps();
++        TS_ASSERT_EQUALS(line_locations.size(), 0u);
++        TS_ASSERT_EQUALS(line_cell_ids.size(), 0u);
++
++        // Test that after remeshing, each element contains the correct nodes
++        unsigned node_indices_element_2[5] = {0, 1, 2, 3, 4};
++        for (unsigned i=0; i<4; i++)
++        {
++            TS_ASSERT_EQUALS(vertex_mesh.GetElement(2)->GetNodeGlobalIndex(i), node_indices_element_2[i]);
++        }
++
++        // Test that the cell corresponding to element 0 and 1 has been
++        // marked as deleted and the others haven't
++        TS_ASSERT(cell_population.GetCellUsingLocationIndex(0)->IsDead());
++        TS_ASSERT(cell_population.GetCellUsingLocationIndex(1)->IsDead());
++        TS_ASSERT(!cell_population.GetCellUsingLocationIndex(2)->IsDead());
++
++        // None of the cells should be deleted yet
++        TS_ASSERT_EQUALS(cell_population.rGetCells().size(), 3u);
++    }
++
++    void TestKillerForMultipleLineRemovalsInSimulation()
++    {
++        /**
++         * We conduct the same test as before, but now within an OffLatticeSimulation. We make sure that
++         * all killed cells and the corresponding vertex elements get correctly deleted.
++         */
++        std::vector<Node<2>*> nodes;
++        nodes.push_back(new Node<2>(0, true,  0.0, 0.0));
++        nodes.push_back(new Node<2>(1, true,  1.0, 0.0));
++        nodes.push_back(new Node<2>(2, true,  0.8, 0.2));
++        nodes.push_back(new Node<2>(3, true,  0.5, 0.5));
++        nodes.push_back(new Node<2>(4, true,  0.3, 0.3));
++
++        std::vector<Node<2>*> nodes_elem_0, nodes_elem_1, nodes_elem_2;
++        unsigned node_indices_elem_0[2] = {3, 4};
++        unsigned node_indices_elem_1[2] = {1, 2};
++        unsigned node_indices_elem_2[5] = {0, 1, 2, 3, 4};
++
++        for (unsigned i=0; i<5; i++)
++        {
++            nodes_elem_2.push_back(nodes[node_indices_elem_2[i]]);
++            if (i < 2)
++            {
++                nodes_elem_0.push_back(nodes[node_indices_elem_0[i]]);
++                nodes_elem_1.push_back(nodes[node_indices_elem_1[i]]);
++            }
++        }
++
++        std::vector<VertexElement<2,2>*> vertex_elements;
++        vertex_elements.push_back(new VertexElement<2,2>(0, nodes_elem_0));
++        vertex_elements.push_back(new VertexElement<2,2>(1, nodes_elem_1));
++        vertex_elements.push_back(new VertexElement<2,2>(2, nodes_elem_2));
++
++        MutableVertexMesh<2,2> vertex_mesh(nodes, vertex_elements);
++
++        // Test that the numbers of nodes and elements are correct
++        TS_ASSERT_EQUALS(vertex_mesh.GetNumElements(), 3u);
++        TS_ASSERT_EQUALS(vertex_mesh.GetNumNodes(), 5u);
++
++        // Get a cell population
++        CellsGenerator<FixedG1GenerationalCellCycleModel, 2> cells_generator;
++        std::vector<CellPtr> cells;
++        cells_generator.GenerateBasic(cells, vertex_mesh.GetNumElements(), std::vector<unsigned>());
++        VertexBasedCellPopulation<2> cell_population(vertex_mesh, cells);
++
++        // the population should have 3 cells
++        TS_ASSERT_EQUALS(cell_population.GetNumRealCells(), 3u)
++
++        // make a simulator
++        OffLatticeSimulation<2> simulator(cell_population);
++        simulator.SetOutputDirectory("TestT2SwapCellKillerMultipleLineRemovalsInSimulation");
++        simulator.SetEndTime(0.003);
++
++        // Perform swaps
++        simulator.Solve();
++
++        TS_ASSERT_EQUALS(vertex_mesh.GetNumElements(), 1u);
++        TS_ASSERT_EQUALS(vertex_mesh.GetNumNodes(), 5u);
++
++        // Test that after remeshing, each element contains the correct number of nodes
++        TS_ASSERT_EQUALS(vertex_mesh.GetElement(0)->GetNumNodes(), 5u);
++
++        // Test that after remeshing, each element contains the correct nodes
++        //unsigned node_indices_element_2[5] = {0, 1, 2, 3, 4};
++        unsigned node_indices_element_0[5] = {0, 1, 2, 3, 4};
++        for (unsigned i=0; i<3; i++)
++        {
++            TS_ASSERT_EQUALS(vertex_mesh.GetElement(0)->GetNodeGlobalIndex(i), node_indices_element_0[i]);
++        }
++
++        // Test that the cell corresponding to element 0 and 1 have been
++        // deleted and none of the cells is marked as dead
++
++        TS_ASSERT_EQUALS(cell_population.rGetCells().size(), 1u);
++
++        TS_ASSERT(!cell_population.GetCellUsingLocationIndex(0)->IsDead());
++    }
++
++    /**
++     * This tests that T1 and intersection swaps rearrange to form a linear
++     * element for a line removal
++     */
++    void TestPrepareForLineRemoval()
++    {
++        /*
++         * Create a mesh comprising seven nodes contained in three rhomboid
++         * elements. We will test that a T1 swap and an intersection swap
++         * correctly result in a linear element, which is then correctly
++         * removed by a line removal.
++         */
++        std::vector<Node<2>*> nodes;
++        nodes.push_back(new Node<2>(0, true, 0.0,  0.0));
++        nodes.push_back(new Node<2>(1, true, 1.0,  0.0));
++        nodes.push_back(new Node<2>(2, true, 0.5,  1.0));
++        nodes.push_back(new Node<2>(3, true, 0.45, 0.2));
++        nodes.push_back(new Node<2>(4, false, 0.55, 0.2));
++        nodes.push_back(new Node<2>(5, true, 0.5,  0.8));
++        nodes.push_back(new Node<2>(6, true, 0.5,  0.5));
++
++        std::vector<Node<2>*> nodes_elem_0, nodes_elem_1, nodes_elem_2, nodes_elem_3;
++        unsigned node_indices_elem_0[4] = {0, 1, 4, 3};
++        unsigned node_indices_elem_1[4] = {1, 2, 5, 4};
++        unsigned node_indices_elem_2[4] = {3, 4, 5, 6};
++        for (unsigned i=0; i<4; i++)
++        {
++            nodes_elem_0.push_back(nodes[node_indices_elem_0[i]]);
++            nodes_elem_1.push_back(nodes[node_indices_elem_1[i]]);
++            nodes_elem_2.push_back(nodes[node_indices_elem_2[i]]);
++        }
++
++        std::vector<VertexElement<2,2>*> vertex_elements;
++        vertex_elements.push_back(new VertexElement<2,2>(0, nodes_elem_0));
++        vertex_elements.push_back(new VertexElement<2,2>(1, nodes_elem_1));
++        vertex_elements.push_back(new VertexElement<2,2>(2, nodes_elem_2));
++
++        MutableVertexMesh<2,2> vertex_mesh(nodes, vertex_elements);
++
++        // Set the threshold distance between nodes for T1 swaps to be longer than the small edge of the mesh
++        vertex_mesh.SetCellRearrangementThreshold(0.2 / 1.5);
++
++        // Set check for internal intersections for intersection swaps
++        vertex_mesh.SetCheckForInternalIntersections(true);
++
++        /*
++         * Calling ReMesh() once should result in a T1 swap occurring for nodes 3 and 4,
++         * followed by an intersection swap on node 6
++         */
++        vertex_mesh.ReMesh();
++
++        TS_ASSERT_EQUALS(vertex_mesh.GetNumElements(), 3u);
++        TS_ASSERT_EQUALS(vertex_mesh.GetNumNodes(), 7u);
++
++        // Test that each moved node has the correct location following the rearrangement
++        TS_ASSERT_DELTA(vertex_mesh.GetNode(3)->rGetLocation()[0], 0.5, 1e-8);
++        TS_ASSERT_DELTA(vertex_mesh.GetNode(3)->rGetLocation()[1], 0.1, 1e-8);
++        TS_ASSERT_DELTA(vertex_mesh.GetNode(4)->rGetLocation()[0], 0.5, 1e-3);
++        TS_ASSERT_DELTA(vertex_mesh.GetNode(4)->rGetLocation()[1], 0.3, 1e-3);
++
++        // Test that each element contains the correct number of nodes following the rearrangement
++        TS_ASSERT_EQUALS(vertex_mesh.GetElement(0)->GetNumNodes(), 3u);
++        TS_ASSERT_EQUALS(vertex_mesh.GetElement(1)->GetNumNodes(), 6u);
++        TS_ASSERT_EQUALS(vertex_mesh.GetElement(2)->GetNumNodes(), 2u);
++
++        // Test that each element contains the correct nodes following the rearrangement
++        unsigned node_indices_element_0[3] = {0, 1, 3};
++        unsigned node_indices_element_1[6] = {1, 2, 5, 6, 4, 3};
++        unsigned node_indices_element_2[2] = {4, 6};
++        for (unsigned i=0; i<6; i++)
++        {
++            if (i < 2)
++            {
++                TS_ASSERT_EQUALS(vertex_mesh.GetElement(2)->GetNodeGlobalIndex(i), node_indices_element_2[i]);
++            }
++            if (i < 3)
++            {
++                TS_ASSERT_EQUALS(vertex_mesh.GetElement(0)->GetNodeGlobalIndex(i), node_indices_element_0[i]);
++            }
++            TS_ASSERT_EQUALS(vertex_mesh.GetElement(1)->GetNodeGlobalIndex(i), node_indices_element_1[i]);
++        }
++
++        /*
++         * Calling ReMesh() once more should result in a line removal occurring for element 2
++         */
++
++        // Get a cell population
++        CellsGenerator<FixedG1GenerationalCellCycleModel, 2> cells_generator;
++        std::vector<CellPtr> cells;
++        cells_generator.GenerateBasic(cells, vertex_mesh.GetNumElements(), std::vector<unsigned>());
++        VertexBasedCellPopulation<2> cell_population(vertex_mesh, cells);
++
++        // ... and give it to the killer
++        T2SwapCellKiller<2> cell_killer(&cell_population);
++
++        // Perform swaps
++        cell_killer.CheckAndLabelCellsForApoptosisOrDeath();
++
++        TS_ASSERT_EQUALS(vertex_mesh.GetNumElements(), 2u);
++        TS_ASSERT_EQUALS(vertex_mesh.GetNumNodes(), 7u);
++
++        // Test that each element contains the correct number of nodes following the rearrangement
++        TS_ASSERT_EQUALS(vertex_mesh.GetElement(0)->GetNumNodes(), 3u);
++        TS_ASSERT_EQUALS(vertex_mesh.GetElement(1)->GetNumNodes(), 6u);
++
++        // Test that each element contains the correct nodes following the rearrangement
++        unsigned new_node_indices_element_0[3] = {0, 1, 3};
++        unsigned new_node_indices_element_1[6] = {1, 2, 5, 6, 4, 3};
++        for (unsigned i=0; i<6; i++)
++        {
++            if (i < 3)
++            {
++                TS_ASSERT_EQUALS(vertex_mesh.GetElement(0)->GetNodeGlobalIndex(i), new_node_indices_element_0[i]);
++            }
++            TS_ASSERT_EQUALS(vertex_mesh.GetElement(1)->GetNodeGlobalIndex(i), new_node_indices_element_1[i]);
++        }
++    }
++};
++
++#endif /*TESTLINEREMOVALCELLKILLER_HPP_*/
+-- 
+2.25.1
+
+
+From d36bec76ed4fc7406842ea78e0966222ce40deca Mon Sep 17 00:00:00 2001
+From: Thomas Pak <thomas.pak@linacre.ox.ac.uk>
+Date: Mon, 12 Jul 2021 22:44:34 +0100
+Subject: [PATCH 8/8] Implement line removal as T2 swap
+
+---
+ mesh/src/vertex/MutableVertexMesh.cpp | 30 +++++++++++++--------------
+ 1 file changed, 14 insertions(+), 16 deletions(-)
+
+diff --git a/mesh/src/vertex/MutableVertexMesh.cpp b/mesh/src/vertex/MutableVertexMesh.cpp
+index 45c8f5605..27349df6b 100644
+--- a/mesh/src/vertex/MutableVertexMesh.cpp
++++ b/mesh/src/vertex/MutableVertexMesh.cpp
+@@ -1022,17 +1022,14 @@ bool MutableVertexMesh<ELEMENT_DIM, SPACE_DIM>::CheckForT2Swaps(VertexElementMap
+          ++elem_iter)
+     {
+         // If this element is triangular...
+-        if (elem_iter->GetNumNodes() == 3)
++        if (((elem_iter->GetNumNodes() == 3) && (this->GetVolumeOfElement(elem_iter->GetIndex()) < GetT2Threshold()))
++                    || (elem_iter->GetNumNodes() == 2))
+         {
+-            // ...and smaller than the threshold area...
+-            if (this->GetVolumeOfElement(elem_iter->GetIndex()) < GetT2Threshold())
+-            {
+-                // ...then perform a T2 swap and break out of the loop
+-                PerformT2Swap(*elem_iter);
+-                ///\todo: cover this line in a test
+-                rElementMap.SetDeleted(elem_iter->GetIndex());
+-                return true;
+-            }
++            // ...then perform a T2 swap and break out of the loop
++            PerformT2Swap(*elem_iter);
++            ///\todo: cover this line in a test
++            rElementMap.SetDeleted(elem_iter->GetIndex());
++            return true;
+         }
+     }
+     return false;
+@@ -1764,6 +1761,7 @@ void MutableVertexMesh<ELEMENT_DIM, SPACE_DIM>::PerformIntersectionSwap(Node<SPA
+     // Get element B
+     unsigned element_b_index = UINT_MAX;
+     VertexElement<ELEMENT_DIM, SPACE_DIM>* p_element_b = nullptr;
++    p_element_b = p_element_b;
+     if (elements_containing_intersecting_node.size() == 2)
+     {
+         iter++;
+@@ -1771,12 +1769,12 @@ void MutableVertexMesh<ELEMENT_DIM, SPACE_DIM>::PerformIntersectionSwap(Node<SPA
+         p_element_b = this->GetElement(element_b_index);
+     }
+ 
+-    // T1 swaps can sometimes result in a concave triangular element (#3067)
+-    if ((p_element_a->GetNumNodes() == 3) || ((p_element_b != nullptr) && p_element_b->GetNumNodes() == 3))
+-    {
+-        EXCEPTION("A triangular element has become concave. "
+-                  "You need to rerun the simulation with a smaller time step to prevent this.");
+-    }
++    //// T1 swaps can sometimes result in a concave triangular element (#3067)
++    //if ((p_element_a->GetNumNodes() == 3) || ((p_element_b != nullptr) && p_element_b->GetNumNodes() == 3))
++    //{
++    //    EXCEPTION("A triangular element has become concave. "
++    //              "You need to rerun the simulation with a smaller time step to prevent this.");
++    //}
+ 
+     // Get node B index
+     unsigned node_A_local_index_in_a = p_element_a->GetNodeLocalIndex(node_A_index);
+-- 
+2.25.1
+
