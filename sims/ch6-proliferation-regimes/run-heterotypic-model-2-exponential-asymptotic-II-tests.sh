@@ -40,4 +40,4 @@ sim_num="$((sim_start + (SLURM_ARRAY_TASK_ID - SLURM_ARRAY_TASK_MIN)))"
 
 # Generate parameters and run simulation
 python3 generate-parameters-heterotypic-model-2-exponential-asymptotic-II-tests.py $sim_num | \
-            "$CHASTE_BUILD/projects/competition-vbm/apps/DeathClockApp"
+            "$CHASTE_BUILD/projects/cell-competition/apps/DeathClockApp"

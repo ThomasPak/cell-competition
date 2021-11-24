@@ -43,7 +43,7 @@ line_num="$((sim_num + 1))"
 # Generate parameters and run simulation
 python3 generate-parameters-mechanical-found-tests.py | \
     sed -n "$line_num"p | tr ',' '\n' | \
-    "$CHASTE_BUILD/projects/competition-vbm/apps/CellCompetitionApp" \
+    "$CHASTE_BUILD/projects/cell-competition/apps/CellCompetitionApp" \
     random-movement-parameter=0 \
     output-directory=mechanical-found-tests \
     simulation-time=250 \
