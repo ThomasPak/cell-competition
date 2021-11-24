@@ -3,7 +3,7 @@ import pandas as pd
 from scipy.stats import expon, uniform
 
 import sys
-sys.path.append('../scripts')
+sys.path.append('../../well_mixed')
 from well_mixed_death_clock import (WellMixedSimulator,
     WellMixedSimulationData, exponential_ccm, uniform_ccm,
     normalised_g2_death_signal)
