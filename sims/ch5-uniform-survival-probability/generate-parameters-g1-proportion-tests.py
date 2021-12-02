@@ -35,36 +35,6 @@ simulation-id = ccm_{1}_rho_{6:.2f}_eta_{7:.2f}_beta_{8:.2f}_sim_{9}
 # Define number of iterations
 num_iter = 20
 
-# Define values to iterate over for exponential cell cycle model
-cell_cycle_model = 'exponential'
-tG = 100
-etas = [1, 1/2, 1/5, 1/10, 1/20]
-betas = [2/10, 1/2, 8/10]
-
-# Read given simulation number and initialise simulation counter
-param_strings = []
-sim_counter = 0
-
-# Generate parameter strings
-for eta in etas:
-    for beta in betas:
-        for i in range(num_iter):
-
-            seed = sim_counter + 1
-            param_string = base_string.format(seed,
-                    cell_cycle_model,
-                    eta * tG,
-                    beta * tG,
-                    tG - beta * tG,
-                    0,
-                    0,
-                    eta,
-                    beta,
-                    sim_counter)
-
-            param_strings.append(param_string)
-            sim_counter += 1
-
 # Define values to iterate over for uniform cell cycle model
 cell_cycle_model = 'uniform'
 tG = 100
@@ -97,6 +67,10 @@ rho_etas = [
         (0.25, 0.12),
         (0.25, 0.08),
         ]
+
+# Read given simulation number and initialise simulation counter
+param_strings = []
+sim_counter = 0
 
 # Generate parameter strings
 for rho, eta in rho_etas:
