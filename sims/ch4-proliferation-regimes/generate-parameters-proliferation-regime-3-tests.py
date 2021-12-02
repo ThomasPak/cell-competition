@@ -2,17 +2,19 @@ import numpy as np
 from sys import argv
 
 # One argument must be given
-if not len(argv) is 2:
+if len(argv) != 2:
     print("Usage: {} SIM_NUM".format(argv[0]))
     exit(2)
 
 # This part of the input is the same for all simulations in this suite
 base_string = """
-output-directory = extinction-probability-regime-1-tests
+output-directory = proliferation-regime-3-tests
 
 simulation-time = 100000
 dt = 0.005
 sampling-timestep-multiple = 200
+
+max-cell-count = 50
 
 num-cells-up = 1
 
@@ -33,9 +35,9 @@ simulation-id = theta_{3:.2f}_n0_{2}_sim_{4}
 """
 
 # Define values to iterate over
-thetas = np.array([ 1/5, 1/3, 3/7 ])
+thetas = np.array([ 4/7, 2/3, 4/5 ])
 death_thresholds = 50 * np.log(1 / (1 - thetas))
-num_cells_across_array = [ 10, 30, 50 ]
+num_cells_across_array = [ 1, 3, 5 ]
 num_iter = 100
 
 # Read given simulation number and initialise simulation counter

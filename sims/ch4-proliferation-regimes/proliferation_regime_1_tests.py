@@ -26,7 +26,7 @@ f_args = (base_rate,)
 ccm_args = (tG1,)
 
 # Helper function
-def run_extinction_exponential_simulation(Tdeath, initial_cell_count, seed=None, max_cell_count=np.inf):
+def run_proliferation_regime_exponential_simulation(Tdeath, initial_cell_count, seed=None, max_cell_count=np.inf):
 
     # We create a random_state seeded with seed + 1 to sample the initial
     # conditions in order to avoid correlations with the simulation.
@@ -90,7 +90,7 @@ if __name__ == '__main__':
     for Tdeath, initial_cell_count, seed in \
             zip(Tdeath_data, initial_cell_count_data, seed_data):
 
-        sim_data = run_extinction_exponential_simulation(Tdeath, initial_cell_count, seed)
+        sim_data = run_proliferation_regime_exponential_simulation(Tdeath, initial_cell_count, seed)
 
         status = sim_data.get_status()
         t_events = sim_data.get_t_events()
@@ -124,4 +124,4 @@ if __name__ == '__main__':
         'num_deaths' : num_deaths_data,
         })
 
-    df.to_csv('mc-extinction-regime-1-data.csv', index_label='simulation_id')
+    df.to_csv('mc-proliferation-regime-1-data.csv', index_label='simulation_id')
