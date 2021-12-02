@@ -1,6 +1,8 @@
 import numpy as np
 import sys
 
+import sys
+sys.path.append('../lib')
 from heterotypic_model_2_parameter_sweep import heterotypic_model_2_parameter_sweep_general
 
 # Homotypic uniform cell cycle model
