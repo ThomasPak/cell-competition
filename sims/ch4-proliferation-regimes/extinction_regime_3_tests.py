@@ -20,6 +20,7 @@ base_rate = 1
 tstart = 0
 tend = np.inf
 num_iter = 1000
+max_cell_count = 50
 
 # Arguments to f and ccm
 f_args = (base_rate,)
@@ -56,10 +57,9 @@ def run_extinction_exponential_simulation(Tdeath, initial_cell_count, seed=None,
 if __name__ == '__main__':
 
     # Exponential ccm parameter sweep
-    #thetas = np.array([ 4/7, 3/5, 2/3, 3/4, 4/5 ])
-    thetas = np.array([ 1/5, 1/4, 1/3, 2/5, 3/7 ])
+    thetas = np.array([ 4/7, 3/5, 2/3, 3/4, 4/5 ])
     Tdeaths = base_rate * tG1 * np.log(1 / (1 - thetas))
-    initial_cell_counts = [ 10, 20, 30, 40, 50 ]
+    initial_cell_counts = [ 1, 2, 3, 4, 5 ]
 
     # Generate parameters
     theta_data = []
@@ -91,7 +91,8 @@ if __name__ == '__main__':
     for Tdeath, initial_cell_count, seed in \
             zip(Tdeath_data, initial_cell_count_data, seed_data):
 
-        sim_data = run_extinction_exponential_simulation(Tdeath, initial_cell_count, seed)
+        sim_data = run_extinction_exponential_simulation(Tdeath,
+                initial_cell_count, seed, max_cell_count)
 
         status = sim_data.get_status()
         t_events = sim_data.get_t_events()
@@ -125,4 +126,4 @@ if __name__ == '__main__':
         'num_deaths' : num_deaths_data,
         })
 
-    df.to_csv('mc-extinction-mean-hitting-time-exponential-data.csv', index_label='simulation_id')
+    df.to_csv('mc-extinction-regime-3-data.csv', index_label='simulation_id')
