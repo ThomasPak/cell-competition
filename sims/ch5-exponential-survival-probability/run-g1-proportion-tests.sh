@@ -5,7 +5,7 @@
 #SBATCH --job-name=g1-proportion-tests
 #SBATCH --output=g1-proportion-tests_%A_%a.out
 #SBATCH --error=g1-proportion-tests_%A_%a.err
-#SBATCH --array=0-699
+#SBATCH --array=0-299
 
 #SBATCH --mail-type=all
 #SBATCH --mail-user=thomas.pak@linacre.ox.ac.uk

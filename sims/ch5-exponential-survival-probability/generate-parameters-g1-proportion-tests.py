@@ -65,61 +65,6 @@ for eta in etas:
             param_strings.append(param_string)
             sim_counter += 1
 
-# Define values to iterate over for uniform cell cycle model
-cell_cycle_model = 'uniform'
-tG = 100
-param_dict = {
-        # A
-        (0.4, 0.6) : [0.5],
-        # Bp
-        (0.2, 0.3) : [0.2, 1 - np.sqrt(0.3), 0.8],
-        # Bpp
-        (0.4, 0.45) : [0.4, 0.8],
-        # Cp
-        (0.4, 0.2) : [0.4, 1 - np.sqrt(0.2), 0.9],
-        # Cpp
-        (0.6, 0.3) : [0.6, 0.9],
-        # D
-        (0.1, 0.16) : [0.1, 0.5, 0.9],
-        # E
-        (0.25, 0.12) : [0.25, 0.5, 0.95],
-        # E low eta
-        (0.25, 0.08) : [0.25, 0.5, 0.95],
-        }
-
-rho_etas = [
-        (0.4, 0.6),
-        (0.2, 0.3),
-        (0.4, 0.45),
-        (0.4, 0.2),
-        (0.6, 0.3),
-        (0.1, 0.16),
-        (0.25, 0.12),
-        (0.25, 0.08),
-        ]
-
-# Generate parameter strings
-for rho, eta in rho_etas:
-    betas = param_dict[(rho, eta)]
-    for beta in betas:
-        for i in range(num_iter):
-
-            seed = sim_counter + 1
-            param_string = base_string.format(seed,
-                    cell_cycle_model,
-                    eta * tG,
-                    beta * tG,
-                    tG - beta * tG,
-                    2 * rho * tG,
-                    rho,
-                    eta,
-                    beta,
-                    sim_counter)
-
-            param_strings.append(param_string)
-            sim_counter += 1
-
-
 if argv[1] == 'all':
 
     for param_string in param_strings:
