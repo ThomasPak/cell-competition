@@ -2,7 +2,7 @@ import numpy as np
 import sys
 
 sys.path.append('../lib')
-from heterotypic_model_2_parameter_sweep import heterotypic_model_2_parameter_sweep_general
+from g2_death_signal_parameter_sweep import heterotypic_model_2_parameter_sweep_general
 
 # Exponential cell cycle model
 # Fine sweep over beta_B and eta_B

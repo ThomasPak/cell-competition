@@ -3,7 +3,7 @@ import sys
 
 import sys
 sys.path.append('../lib')
-from heterotypic_model_2_parameter_sweep import heterotypic_model_2_parameter_sweep_general
+from g2_death_signal_parameter_sweep import heterotypic_model_2_parameter_sweep_general
 
 # Homotypic uniform cell cycle model
 # Test g1 proportion with update parameters for D and E

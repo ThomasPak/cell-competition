@@ -2,7 +2,7 @@ import numpy as np
 import pandas as pd
 import sys
 
-from heterotypic_model_2_test import (run_heterotypic_model_2_exponential_test,
+from g2_death_signal_simulation import (run_heterotypic_model_2_exponential_test,
         run_heterotypic_model_2_uniform_test)
 
 from well_mixed_death_clock import normalised_g2_death_signal_heterotypic
