@@ -8,7 +8,7 @@ if len(argv) != 2:
 
 # This part of the input is the same for all simulations in this suite
 base_string = """
-output-directory = g1-proportion-tests
+output-directory = uniform-survival-probability
 
 simulation-time = 100000
 dt = 0.005
