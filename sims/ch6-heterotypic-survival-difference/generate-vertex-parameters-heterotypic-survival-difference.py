@@ -56,7 +56,7 @@ num_iter = 20
 
 # This part of the input is the same for all simulations in this suite
 base_string = """
-output-directory = heterotypic-model-2-exponential-tests
+output-directory = heterotypic-survival-difference
 
 simulation-time = 10000
 dt = 0.005
