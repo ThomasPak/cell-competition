@@ -6,33 +6,6 @@ if len(argv) != 2:
     print("Usage: {} SIM_NUM".format(argv[0]))
     exit(2)
 
-## 15 June 2021
-# Parameter sweep
-beta_As = np.array([0.5])
-tG_As = np.array([100])
-eta_As = np.array([0.1])
-coef_As = np.array([1])
-
-beta_Bs = np.array([0.3, 0.5, 0.7])
-tG_Bs = np.array([100])
-eta_Bs = np.array([0.05, 0.1, 0.2])
-coef_Bs = np.array([1])
-
-# Spatial patterns for initial tissue
-patterns = ['alternating', 'segregated', 'random', 'balanced', 'island',
-        'islandinverted']
-
-# Width of initial tissue
-Nxs = np.array([20])
-
-# Number of iterations
-num_iter = 15
-
-## End 15 June 2021
-
-## 5 July 2021
-## Note that I also changed the max cell count to 1000,
-## where previously it was 5000
 # Parameter sweep
 beta_As = np.array([0.5])
 tG_As = np.array([100])
@@ -52,7 +25,6 @@ Nxs = np.array([10])
 
 # Number of iterations
 num_iter = 20
-## End 5 July 2021
 
 # This part of the input is the same for all simulations in this suite
 base_string = """

@@ -6,7 +6,6 @@ if len(argv) != 2:
     print("Usage: {} SIM_NUM".format(argv[0]))
     exit(2)
 
-## 5 Aug 2021
 # Parameter sweep
 beta_As = np.array([0.4])
 tG_As = np.array([100])
@@ -26,8 +25,6 @@ Nxs = np.array([10])
 
 # Number of iterations
 num_iter = 20
-
-## End 5 Aug 2021
 
 # This part of the input is the same for all simulations in this suite
 base_string = """

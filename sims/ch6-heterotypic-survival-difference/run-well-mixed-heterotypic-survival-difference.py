@@ -29,17 +29,9 @@ tend = 10000
 min_cell_count = 10
 max_cell_count = 1000
 
-datafile_prefix = 'heterotypic-survival-difference'
-
-# 23 July 2021
-#
-# I have gotten interested in terminating the simulation as soon as any cell
-# type goes extinct, since the simulation reduces to a homotypic simulation at
-# that point, diluting the data from the heterotypic simulation.
-
 min_cell_count_for_clone = {0 : 0, 1 : 0}
 
-# End 23 July 2021
+datafile_prefix = 'heterotypic-survival-difference'
 
 # Process arguments
 if len(sys.argv) >= 2:
