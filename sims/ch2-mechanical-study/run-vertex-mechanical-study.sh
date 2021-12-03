@@ -3,9 +3,9 @@
 #SBATCH --ntasks-per-node=1
 #SBATCH --time=1:00:00
 #SBATCH --partition=short
-#SBATCH --job-name=mechanical-tests
-#SBATCH --output=mechanical-tests_%A_%a.out
-#SBATCH --error=mechanical-tests_%A_%a.err
+#SBATCH --job-name=mechanical-study
+#SBATCH --output=mechanical-study_%A_%a.out
+#SBATCH --error=mechanical-study_%A_%a.err
 
 #SBATCH --mail-type=all
 #SBATCH --mail-user=thomas.pak@linacre.ox.ac.uk
@@ -41,7 +41,7 @@ sim_num="$((sim_start + (SLURM_ARRAY_TASK_ID - SLURM_ARRAY_TASK_MIN)))"
 line_num="$((sim_num + 1))"
 
 # Generate parameters and run simulation
-python3 generate-parameters-mechanical-tests.py | \
+python3 generate-vertex-parameters-mechanical-study.py | \
     sed -n "$line_num"p | tr ',' '\n' | \
     "$CHASTE_BUILD/projects/cell-competition/apps/CellCompetitionApp" \
     random-movement-parameter=0 \
