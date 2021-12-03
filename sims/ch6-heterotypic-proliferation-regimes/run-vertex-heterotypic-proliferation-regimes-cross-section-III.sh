@@ -2,9 +2,9 @@
 #SBATCH --nodes=1
 #SBATCH --ntasks-per-node=1
 #SBATCH --time=48:00:00
-#SBATCH --job-name=heterotypic-model-2-exponential-asymptotic-III-tests
-#SBATCH --output=heterotypic-model-2-exponential-asymptotic-III-tests_%A_%a.out
-#SBATCH --error=heterotypic-model-2-exponential-asymptotic-III-tests_%A_%a.err
+#SBATCH --job-name=heterotypic-proliferation-regimes-cross-section-III
+#SBATCH --output=heterotypic-proliferation-regimes-cross-section-III_%A_%a.out
+#SBATCH --error=heterotypic-proliferation-regimes-cross-section-III_%A_%a.err
 
 #SBATCH --mail-type=all
 #SBATCH --mail-user=thomas.pak@linacre.ox.ac.uk
@@ -39,5 +39,5 @@ fi
 sim_num="$((sim_start + (SLURM_ARRAY_TASK_ID - SLURM_ARRAY_TASK_MIN)))"
 
 # Generate parameters and run simulation
-python3 generate-parameters-heterotypic-model-2-exponential-asymptotic-III-tests.py $sim_num | \
+python3 generate-vertex-parameters-heterotypic-proliferation-regimes-cross-section-III.py $sim_num | \
             "$CHASTE_BUILD/projects/cell-competition/apps/DeathClockApp"

@@ -8,9 +8,9 @@ if len(argv) != 2:
 
 ## 5 Aug 2021
 # Parameter sweep
-beta_As = np.array([0.2])
+beta_As = np.array([0.4])
 tG_As = np.array([100])
-eta_As = np.array([0.2])
+eta_As = np.array([0.1])
 coef_As = np.array([1])
 
 beta_Bs = np.arange(0.1, 1, 0.1)
@@ -31,7 +31,7 @@ num_iter = 20
 
 # This part of the input is the same for all simulations in this suite
 base_string = """
-output-directory = heterotypic-model-2-exponential-asymptotic-I-tests
+output-directory = heterotypic-proliferation-regimes-cross-section-III
 
 simulation-time = 10000
 dt = 0.005

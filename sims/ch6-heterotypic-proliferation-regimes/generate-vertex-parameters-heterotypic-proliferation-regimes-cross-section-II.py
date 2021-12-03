@@ -31,7 +31,7 @@ num_iter = 20
 
 # This part of the input is the same for all simulations in this suite
 base_string = """
-output-directory = heterotypic-model-2-exponential-asymptotic-II-tests
+output-directory = heterotypic-proliferation-regimes-cross-section-II
 
 simulation-time = 10000
 dt = 0.005
