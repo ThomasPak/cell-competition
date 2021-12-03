@@ -30,7 +30,7 @@ num_iter = 20
 
 # This part of the input is the same for all simulations in this suite
 base_string = """
-output-directory = heterotypic-model-2-uniform-control-tests
+output-directory = uniform-proliferation-regimes
 
 simulation-time = 10000
 dt = 0.005
