@@ -64,7 +64,7 @@ tend = np.inf
 min_cell_count = 10
 max_cell_count = 1000
 
-datafile_prefix = 'homotypic-model-2-uniform-g1-proportion'
+datafile_prefix = 'uniform-survival-probability'
 
 # Process arguments
 if len(sys.argv) >= 2:

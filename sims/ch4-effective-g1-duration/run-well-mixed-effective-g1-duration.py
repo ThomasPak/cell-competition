@@ -130,7 +130,7 @@ if __name__ == '__main__':
         'effective_g1_sample_size' : effective_g1_sample_size_data,
         })
 
-    df.to_csv('mc-g1-truncation-exponential-data.csv', index_label='simulation_id')
+    df.to_csv('exponential-effective-g1-duration-data.csv', index_label='simulation_id')
 
 # Uniform ccm
 r_fun = lambda alpha: 2 * alpha * tG1
@@ -245,4 +245,4 @@ if __name__ == '__main__':
         'effective_g1_sample_size' : effective_g1_sample_size_data,
         })
 
-    df.to_csv('mc-g1-truncation-uniform-data.csv', index_label='simulation_id')
+    df.to_csv('uniform-effective-g1-duration-data.csv', index_label='simulation_id')

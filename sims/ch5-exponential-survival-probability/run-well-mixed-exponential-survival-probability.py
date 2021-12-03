@@ -146,4 +146,4 @@ if __name__ == '__main__':
         'num_deaths' : num_deaths_data,
         })
 
-    df.to_csv('mc-g1-proportion-range-exponential-data.csv', index_label='simulation_id')
+    df.to_csv('exponential-survival-probability-data.csv', index_label='simulation_id')

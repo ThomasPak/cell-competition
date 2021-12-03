@@ -30,7 +30,7 @@ tend = 10000
 min_cell_count = 10
 max_cell_count = 1000
 
-datafile_prefix = 'heterotypic-model-2-exponential-control'
+datafile_prefix = 'exponential-proliferation-regimes'
 
 # Process arguments
 if len(sys.argv) >= 2:
