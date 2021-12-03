@@ -7,6 +7,8 @@ Philosophy* at the University of Oxford (Trinity 2021).
 The `well_mixed` and `vertex` directories contain the code for the well-mixed
 and vertex models, respectively.
 
+The `sims` directory contains the scripts used to run simulation suites.
+
 ## Well-mixed model
 
 The file `well_mixed/well_mixed_death_clock.py` implements the class
@@ -107,7 +109,7 @@ $ ctest -L Continuous_project-cell-competition
 
 ## TODO
 
-- [ ] Import simulation scripts
+- [X] Import simulation scripts
 - [ ] Import analysis scripts
 - [ ] Import simulation data
 - [ ] Import utils scripts
