@@ -45,7 +45,7 @@ python3 generate-vertex-parameters-mechanical-study.py | \
     sed -n "$line_num"p | tr ',' '\n' | \
     "$CHASTE_BUILD/projects/cell-competition/apps/CellCompetitionApp" \
     random-movement-parameter=0 \
-    output-directory=mechanical-tests \
+    output-directory=mechanical-study \
     simulation-time=250 \
     dt=0.005 \
     sampling-timestep-multiple=200 \
