@@ -104,7 +104,7 @@ the label `Continuous_project-cell-competition` to test the vertex model build.
 
 ```
 $ cd $CHASTE_BUILD
-$ ctest -L Continuous_project-cell-competition
+$ ctest -L Continuous_project_cell-competition
 ```
 
 ## TODO
