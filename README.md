@@ -1,13 +1,16 @@
 # Modelling cell competition
 
-This repository contains the code developed and used in the thesis **Modelling
-cell competition**, submitted by Thomas Pak for the degree of *Doctor of
-Philosophy* at the University of Oxford (Trinity 2021).
+This repository contains the code developed and used in (i) the thesis
+**Modelling cell competition**, submitted by Thomas Pak for the degree of
+*Doctor of Philosophy* at the University of Oxford (Trinity 2021), and (ii) the
+paper **A mathematical framework for the emergence of winners and losers in
+cell competition** (review pending).
 
 The `well_mixed` and `vertex` directories contain the code for the well-mixed
 and vertex models, respectively.
 
-The `sims` directory contains the scripts used to run simulation suites.
+The `sims` and `paper-sims` directories contain the scripts used to run the
+simulation suites described in the thesis and in the paper, respectively.
 
 ## Well-mixed model
 
