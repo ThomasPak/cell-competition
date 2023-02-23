@@ -3,30 +3,34 @@ import pandas as pd
 from scipy.stats import expon, uniform
 
 import sys
-sys.path.append('../../well_mixed')
+sys.path.append('../../../well_mixed')
 from well_mixed_death_clock import (WellMixedSimulator,
     WellMixedSimulationData, exponential_ccm, uniform_ccm,
-    base_rate_death_signal)
+    normalised_g2_death_signal)
 
-# Exponential cell cycle model
-tG1 = 50
-tG2 = 50
+# Cell cycle parameters
+tG1_fun = lambda beta, tG: beta * tG
+tG2_fun = lambda beta, tG: (1 - beta) * tG
 
-# Constant base rate death signal
-f = base_rate_death_signal
-base_rate = 1
+# normalised G2 death signal
+f = normalised_g2_death_signal
+coef = 1
+Tdeath_fun = lambda eta, tG: eta * coef * tG
 
 # Simulation parameters
 tstart = 0
 tend = np.inf
-num_iter = 1000
+min_cell_count = 10
+max_cell_count = 1000
+num_iter = 100
+initial_cell_count = 100
+num_beta = 10
 
-# Arguments to f and ccm
-f_args = (base_rate,)
-ccm_args = (tG1,)
+# Arguments to f
+f_args = (coef,)
 
 # Helper function
-def run_proliferation_regime_exponential_simulation(Tdeath, initial_cell_count, seed=None, max_cell_count=np.inf):
+def run_g1_proportion_range_exponential_simulation(tG, eta, beta, seed=None):
 
     # We create a random_state seeded with seed + 1 to sample the initial
     # conditions in order to avoid correlations with the simulation.
@@ -35,17 +39,35 @@ def run_proliferation_regime_exponential_simulation(Tdeath, initial_cell_count, 
     else:
         random_state = None
 
+    tG1 = tG1_fun(beta, tG)
+    tG2 = tG2_fun(beta, tG)
+    Tdeath = Tdeath_fun(eta, tG)
+
     ccm = exponential_ccm
+    ccm_args = (tG1,)
 
     # Initialise simulator
     simulator = WellMixedSimulator(f, ccm, Tdeath, tG2, tstart, tend,
-            f_args, ccm_args, max_cell_count)
+            f_args, ccm_args, max_cell_count, min_cell_count)
 
     # Generate initial conditions
     tau_0 = np.zeros(initial_cell_count)
-    tbirth_0 = np.zeros(initial_cell_count)
-    tG1_0 = expon.rvs(scale=tG1, size=initial_cell_count, random_state=random_state)
+    tbirth_0 = uniform.rvs(loc= - (tG1 + tG2), scale = tG1 + tG2,
+            size=initial_cell_count, random_state=random_state)
     clone_0 = np.arange(initial_cell_count)
+
+    # Sample G1 durations until birth invariant is satisfied.
+    tG1_0 = []
+    for tbirth in tbirth_0:
+
+        candidate_tG1 = - np.inf
+
+        while not - tbirth - tG2 < candidate_tG1:
+            candidate_tG1 = expon.rvs(scale=tG1, random_state=random_state)
+
+        tG1_0.append(candidate_tG1)
+
+    tG1_0 = np.array(tG1_0)
 
     # Run simulation
     data = simulator.run(tau_0, tbirth_0, tG1_0, clone_0, seed=seed)
@@ -56,29 +78,30 @@ def run_proliferation_regime_exponential_simulation(Tdeath, initial_cell_count, 
 if __name__ == '__main__':
 
     # Exponential ccm parameter sweep
-    thetas = np.array([ 1/5, 1/4, 1/3, 2/5, 3/7 ])
-    Tdeaths = base_rate * tG1 * np.log(1 / (1 - thetas))
-    initial_cell_counts = [ 10, 20, 30, 40, 50 ]
+    tGs = np.array([100])
+    etas = np.array([1, 1/2, 1/5, 1/10, 1/20])
+    betas = np.arange(1 / num_beta, 1, 1 / num_beta)
 
     # Generate parameters
-    theta_data = []
-    Tdeath_data = []
-    initial_cell_count_data = []
-    for theta, Tdeath in zip(thetas, Tdeaths):
-        for initial_cell_count in initial_cell_counts:
-            for i in range(num_iter):
-                theta_data.append(theta)
-                Tdeath_data.append(Tdeath)
-                initial_cell_count_data.append(initial_cell_count)
+    tG_data = []
+    eta_data = []
+    beta_data = []
+    for tG in tGs:
+        for eta in etas:
+            for beta in betas:
+                for i in range(num_iter):
+                    tG_data.append(tG)
+                    eta_data.append(eta)
+                    beta_data.append(beta)
 
     # If initial seed is given as command-line arguments, create seeds in
     # increments of 2 to avoid correlations between simulations because seed +
     # 1 is used for initial conditions.
     if len(sys.argv) == 2:
         initial_seed = int(sys.argv[1])
-        seed_data = np.arange(initial_seed, initial_seed + 2 * len(Tdeath_data), 2)
+        seed_data = np.arange(initial_seed, initial_seed + 2 * len(eta_data), 2)
     else:
-        seed_data = [None] * len(Tdeath_data)
+        seed_data = [None] * len(eta_data)
 
     # Run simulations and postprocess data
     status_data = []
@@ -87,10 +110,9 @@ if __name__ == '__main__':
     num_divisions_data = []
     num_deaths_data = []
 
-    for Tdeath, initial_cell_count, seed in \
-            zip(Tdeath_data, initial_cell_count_data, seed_data):
+    for tG, eta, beta, seed in zip(tG_data, eta_data, beta_data, seed_data):
 
-        sim_data = run_proliferation_regime_exponential_simulation(Tdeath, initial_cell_count, seed)
+        sim_data = run_g1_proportion_range_exponential_simulation(tG, eta, beta, seed)
 
         status = sim_data.get_status()
         t_events = sim_data.get_t_events()
@@ -113,9 +135,9 @@ if __name__ == '__main__':
 
     # Create and write dataframe
     df = pd.DataFrame({
-        'theta' : theta_data,
-        'Tdeath' : Tdeath_data,
-        'initial_cell_count' : initial_cell_count_data,
+        'tG' : tG_data,
+        'eta' : eta_data,
+        'beta' : beta_data,
         'seed' : seed_data,
         'status' : status_data,
         'final_timestep' : final_timestep_data,
@@ -124,4 +146,4 @@ if __name__ == '__main__':
         'num_deaths' : num_deaths_data,
         })
 
-    df.to_csv('proliferation-regime-1-data.csv', index_label='simulation_id')
+    df.to_csv('exponential-survival-probability-data.csv', index_label='simulation_id')

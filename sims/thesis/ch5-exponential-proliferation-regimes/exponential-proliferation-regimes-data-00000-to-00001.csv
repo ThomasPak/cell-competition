@@ -1,0 +1,2 @@
+simulation_id,beta_A,tG_A,rho_A,eta_A,coef_A,beta_B,tG_B,rho_B,eta_B,coef_B,n0_A,n0_B,seed,status,status_info,final_timestep,final_cell_count_A,final_cell_count_B,num_divisions_A,num_divisions_B,num_deaths_A,num_deaths_B,ergodic_rms_A,ergodic_rms_B
+0,0.5,100,0.5,0.1,1,0.05,100,0.05,0.01,1,0,100,0,3,,219.51338147422987,0,10,0,139,0,229,0.4996230371807884,0.049928047772610416

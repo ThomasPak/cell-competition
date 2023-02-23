@@ -3,7 +3,7 @@ import pandas as pd
 from scipy.stats import expon, uniform
 
 import sys
-sys.path.append('../../well_mixed')
+sys.path.append('../../../well_mixed')
 from well_mixed_death_clock import (WellMixedSimulator,
     WellMixedSimulationData, exponential_ccm, uniform_ccm,
     base_rate_death_signal)
@@ -20,7 +20,6 @@ base_rate = 1
 tstart = 0
 tend = np.inf
 num_iter = 1000
-max_cell_count = 50
 
 # Arguments to f and ccm
 f_args = (base_rate,)
@@ -57,9 +56,9 @@ def run_proliferation_regime_exponential_simulation(Tdeath, initial_cell_count, 
 if __name__ == '__main__':
 
     # Exponential ccm parameter sweep
-    thetas = np.array([ 4/7, 3/5, 2/3, 3/4, 4/5 ])
+    thetas = np.array([ 1/5, 1/4, 1/3, 2/5, 3/7 ])
     Tdeaths = base_rate * tG1 * np.log(1 / (1 - thetas))
-    initial_cell_counts = [ 1, 2, 3, 4, 5 ]
+    initial_cell_counts = [ 10, 20, 30, 40, 50 ]
 
     # Generate parameters
     theta_data = []
@@ -91,8 +90,7 @@ if __name__ == '__main__':
     for Tdeath, initial_cell_count, seed in \
             zip(Tdeath_data, initial_cell_count_data, seed_data):
 
-        sim_data = run_proliferation_regime_exponential_simulation(Tdeath,
-                initial_cell_count, seed, max_cell_count)
+        sim_data = run_proliferation_regime_exponential_simulation(Tdeath, initial_cell_count, seed)
 
         status = sim_data.get_status()
         t_events = sim_data.get_t_events()
@@ -126,4 +124,4 @@ if __name__ == '__main__':
         'num_deaths' : num_deaths_data,
         })
 
-    df.to_csv('proliferation-regime-3-data.csv', index_label='simulation_id')
+    df.to_csv('proliferation-regime-1-data.csv', index_label='simulation_id')

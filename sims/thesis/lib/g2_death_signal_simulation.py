@@ -3,7 +3,7 @@ import pandas as pd
 from scipy.stats import expon, uniform
 
 import sys
-sys.path.append('../../well_mixed')
+sys.path.append('../../../well_mixed')
 from well_mixed_death_clock import (WellMixedSimulator,
     WellMixedSimulationData, exponential_ccm_heterotypic,
     uniform_ccm_heterotypic, normalised_g2_death_signal_heterotypic)
