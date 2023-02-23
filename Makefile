@@ -36,6 +36,25 @@ THESISIMAGES = 	 \
 			 images/thesis/ch6-heterotypic-competition-regimes-transformed.png \
 			 images/thesis/ch7-constant-emission.png \
 
+PAPERIMAGES = \
+		 images/paper/homotypic-proliferation-regimes-diagram.png \
+		 images/paper/homotypic-proliferation-regimes-estimated.png \
+		 images/paper/heterotypic-proliferation-regimes-diagram.png \
+		 images/paper/heterotypic-proliferation-regimes-estimated-well-mixed.png \
+		 images/paper/heterotypic-proliferation-regimes-estimated-vertex-random.png \
+		 images/paper/heterotypic-proliferation-regimes-estimated-vertex-segregated.png \
+		 images/paper/classification-of-competitive-interactions.png \
+		 images/paper/competition-regimes.png \
+		 images/paper/competition-regimes-transformed.png \
+		 images/paper/heterotypic-survival-difference-well-mixed.png \
+		 images/paper/heterotypic-survival-difference-vertex.png \
+		 images/paper/homotypic-survival-difference-A-well-mixed.png \
+		 images/paper/homotypic-survival-difference-B-well-mixed.png \
+		 images/paper/homotypic-survival-difference-A-vertex.png \
+		 images/paper/homotypic-survival-difference-B-vertex.png \
+		 images/paper/homotypic-survival-frequency-well-mixed.png \
+		 images/paper/homotypic-survival-frequency-vertex.png
+
 all: thesis_images paper_images
 
 thesis_images: $(THESISIMAGES)
@@ -358,3 +377,147 @@ images/thesis/ch7-constant-emission.png: \
 	python3 figures/thesis/plot-constant-emission.py \
 		$@
 
+# Paper image rules
+images/paper/homotypic-proliferation-regimes-diagram.png: \
+	figures/paper/formatting.py \
+	figures/paper/plot-homotypic-proliferation-regimes-diagram.py
+	python3 figures/paper/plot-homotypic-proliferation-regimes-diagram.py \
+		$@
+
+images/paper/homotypic-proliferation-regimes-estimated.png: \
+	figures/paper/formatting.py \
+	figures/paper/plot-homotypic-proliferation-regimes-estimated.py \
+	figures/paper/plot_survival_difference.py \
+	data/heterotypic-model-2-exponential-control-data-04-10-2021.csv \
+	data/heterotypic-model-2-exponential-control-tests-data-04-08-2021.csv
+	python3 figures/paper/plot-homotypic-proliferation-regimes-estimated.py \
+		data/heterotypic-model-2-exponential-control-data-04-10-2021.csv \
+		data/heterotypic-model-2-exponential-control-tests-data-04-08-2021.csv \
+		$@
+
+images/paper/heterotypic-proliferation-regimes-diagram.png: \
+	figures/paper/formatting.py \
+	figures/paper/plot-heterotypic-proliferation-regimes-diagram.py
+	python3 figures/paper/plot-heterotypic-proliferation-regimes-diagram.py \
+		$@
+
+images/paper/heterotypic-proliferation-regimes-estimated-well-mixed.png: \
+	figures/paper/formatting.py \
+	figures/paper/plot-heterotypic-proliferation-regimes-estimated-well-mixed.py \
+	figures/paper/plot_survival_difference.py \
+	data/heterotypic-model-2-exponential-asymptotic-I-data-02-08-2021.csv \
+	data/heterotypic-model-2-exponential-asymptotic-II-data-02-08-2021.csv \
+	data/heterotypic-model-2-exponential-asymptotic-III-data-02-08-2021.csv
+	python3 figures/paper/plot-heterotypic-proliferation-regimes-estimated-well-mixed.py \
+		data/heterotypic-model-2-exponential-asymptotic-I-data-02-08-2021.csv \
+		data/heterotypic-model-2-exponential-asymptotic-II-data-02-08-2021.csv \
+		data/heterotypic-model-2-exponential-asymptotic-III-data-02-08-2021.csv \
+		$@
+
+images/paper/heterotypic-proliferation-regimes-estimated-vertex-random.png: \
+	figures/paper/formatting.py \
+	figures/paper/plot-heterotypic-proliferation-regimes-estimated-vertex.py \
+	figures/paper/plot_survival_difference.py \
+	data/heterotypic-model-2-exponential-asymptotic-I-tests-data-06-08-2021.csv \
+	data/heterotypic-model-2-exponential-asymptotic-II-tests-data-09-08-2021.csv \
+	data/heterotypic-model-2-exponential-asymptotic-III-tests-data-09-08-2021.csv
+	python3 figures/paper/plot-heterotypic-proliferation-regimes-estimated-vertex.py \
+		random \
+		data/heterotypic-model-2-exponential-asymptotic-I-tests-data-06-08-2021.csv \
+		data/heterotypic-model-2-exponential-asymptotic-II-tests-data-09-08-2021.csv \
+		data/heterotypic-model-2-exponential-asymptotic-III-tests-data-09-08-2021.csv \
+		$@
+
+images/paper/heterotypic-proliferation-regimes-estimated-vertex-segregated.png: \
+	figures/paper/formatting.py \
+	figures/paper/plot-heterotypic-proliferation-regimes-estimated-vertex.py \
+	figures/paper/plot_survival_difference.py \
+	data/heterotypic-model-2-exponential-asymptotic-I-tests-data-06-08-2021.csv \
+	data/heterotypic-model-2-exponential-asymptotic-II-tests-data-09-08-2021.csv \
+	data/heterotypic-model-2-exponential-asymptotic-III-tests-data-09-08-2021.csv
+	python3 figures/paper/plot-heterotypic-proliferation-regimes-estimated-vertex.py \
+		segregated \
+		data/heterotypic-model-2-exponential-asymptotic-I-tests-data-06-08-2021.csv \
+		data/heterotypic-model-2-exponential-asymptotic-II-tests-data-09-08-2021.csv \
+		data/heterotypic-model-2-exponential-asymptotic-III-tests-data-09-08-2021.csv \
+		$@
+
+images/paper/classification-of-competitive-interactions.png: \
+	figures/paper/formatting.py \
+	figures/paper/plot-classification-of-competitive-interactions.py
+	python3 figures/paper/plot-classification-of-competitive-interactions.py \
+		$@
+
+images/paper/competition-regimes.png: \
+	figures/paper/formatting.py \
+	figures/paper/competition_regimes.py \
+	figures/paper/plot-competition-regimes.py
+	python3 figures/paper/plot-competition-regimes.py \
+		I-II \
+		$@
+
+images/paper/competition-regimes-transformed.png: \
+	figures/paper/formatting.py \
+	figures/paper/competition_regimes.py \
+	figures/paper/plot-competition-regimes-transformed.py
+	python3 figures/paper/plot-competition-regimes-transformed.py \
+		$@
+
+images/paper/heterotypic-survival-difference-well-mixed.png: \
+	figures/paper/formatting.py \
+	figures/paper/plot-heterotypic-survival-difference-well-mixed.py \
+	figures/paper/plot_survival_difference.py \
+	data/heterotypic-model-2-exponential-data-27-07-2021.csv
+	python3 figures/paper/plot-heterotypic-survival-difference-well-mixed.py \
+		data/heterotypic-model-2-exponential-data-27-07-2021.csv \
+		$@
+
+images/paper/heterotypic-survival-difference-vertex.png: \
+	figures/paper/formatting.py \
+	figures/paper/plot-heterotypic-survival-difference-vertex.py \
+	figures/paper/plot_survival_difference.py \
+	data/heterotypic-model-2-exponential-tests-data-04-08-2021.csv
+	python3 figures/paper/plot-heterotypic-survival-difference-vertex.py  \
+		data/heterotypic-model-2-exponential-tests-data-04-08-2021.csv \
+		$@
+
+images/paper/homotypic-survival-difference-%-well-mixed.png: \
+	figures/paper/formatting.py \
+	figures/paper/plot-homotypic-survival-difference-well-mixed.py \
+	figures/paper/plot_survival_difference.py \
+	data/heterotypic-model-2-exponential-data-27-07-2021.csv \
+	data/heterotypic-model-2-exponential-control-data-04-10-2021.csv
+	python3 figures/paper/plot-homotypic-survival-difference-well-mixed.py \
+		data/heterotypic-model-2-exponential-data-27-07-2021.csv \
+		data/heterotypic-model-2-exponential-control-data-04-10-2021.csv \
+		$* \
+		$@
+
+images/paper/homotypic-survival-difference-%-vertex.png: \
+	figures/paper/formatting.py \
+	figures/paper/plot-homotypic-survival-difference-vertex.py \
+	figures/paper/plot_survival_difference.py \
+	data/heterotypic-model-2-exponential-tests-data-04-08-2021.csv \
+	data/heterotypic-model-2-exponential-control-tests-data-04-08-2021.csv
+	python3 figures/paper/plot-homotypic-survival-difference-vertex.py \
+		data/heterotypic-model-2-exponential-tests-data-04-08-2021.csv \
+		data/heterotypic-model-2-exponential-control-tests-data-04-08-2021.csv \
+		$* \
+		$@
+
+images/paper/homotypic-survival-frequency-well-mixed.png: \
+	figures/paper/formatting.py \
+	figures/paper/plot-homotypic-survival-frequency-well-mixed.py \
+	data/homotypic-g2-death-signal-exponential-data-26-08-2021.csv
+	python3 figures/paper/plot-homotypic-survival-frequency-well-mixed.py \
+		data/homotypic-g2-death-signal-exponential-data-26-08-2021.csv \
+		n \
+		$@
+
+images/paper/homotypic-survival-frequency-vertex.png: \
+	figures/paper/formatting.py \
+	figures/paper/plot-homotypic-survival-frequency-vertex.py \
+	data/g1-proportion-tests-data-07-10-2021.csv
+	python3 figures/paper/plot-homotypic-survival-frequency-vertex.py \
+		data/g1-proportion-tests-data-07-10-2021.csv \
+		$@ y
