@@ -16,10 +16,10 @@ rho_As = np.array([0.3])
 eta_As = np.array([0.1])
 coef_As = np.array([1])
 
-beta_Bs = np.arange(3, 10, 0.5) / 10
+beta_Bs = np.arange(0.05, 1, 0.05)
 tG_Bs = np.array([100])
-rho_Bs = np.array([0.3, 0.5, 0.7])
-eta_Bs = np.arange(0.01, 0.26, 0.01)
+rho_Bs = np.array([0.10, 0.25])
+eta_Bs = np.arange(0.02, 0.52, 0.02)
 coef_Bs = np.array([1])
 
 n0s = [(0, 100)]

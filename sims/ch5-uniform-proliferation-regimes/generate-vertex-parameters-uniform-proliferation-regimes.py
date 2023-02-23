@@ -15,9 +15,9 @@ rho_As = np.array([0.3])
 
 beta_Bs = np.arange(0.1, 1, 0.1)
 tG_Bs = np.array([100])
-eta_Bs = np.arange(0.02, 0.25, 0.02)
+eta_Bs = np.arange(0.04, 0.50, 0.04)
 coef_Bs = np.array([1])
-rho_Bs = np.array([0.3, 0.5, 0.7])
+rho_Bs = np.array([0.1, 0.25])
 
 # Spatial patterns for initial tissue
 patterns = ['control']
