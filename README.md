@@ -1,10 +1,13 @@
 # Modelling cell competition
 
 This repository contains the code developed and used in (i) the thesis
-**Modelling cell competition**, submitted by Thomas Pak for the degree of
-*Doctor of Philosophy* at the University of Oxford (Trinity 2021), and (ii) the
-paper **A mathematical framework for the emergence of winners and losers in
-cell competition** (review pending).
+[**Modelling cell
+competition**](https://ora.ox.ac.uk/objects/uuid:d1ecfcd1-9dd0-41f0-98f9-262a95522cd0),
+submitted by Thomas Pak for the degree of *Doctor of Philosophy* at the
+University of Oxford (Trinity 2021), and (ii) the paper **A mathematical
+framework for the emergence of winners and losers in cell competition**
+(preprint:
+[https://doi.org/10.1101/2023.03.14.531164](https://doi.org/10.1101/2023.03.14.531164)).
 
 * The `well_mixed` and `vertex` directories contain the code for the well-mixed
   and vertex models, respectively.
