@@ -26,20 +26,18 @@ to run simulation 69 in `section-2.2`:
 
 ```
 $ cd section-2.2
-$ bash run-vertex-mechanical-study.sh 69
+$ bash run-vertex-mechanical-latin-study.sh 69
 ```
 
 ## Note for Windows users
 
-The contents of this directory are Linux-type symbolic links to the
-corresponding directories in `/sims`.  These do not work in a Windows
-environment.  Instead, please navigate to the relevant directory using the
-following table.
+Most of the files in this directory are Linux-type symbolic links to
+directories in `/sims/thesis`.  These do not work in a Windows environment.
+Instead, please navigate to the relevant directory using the following table.
 
-| Symbolic link   | Target directory                              |
-|-----------------|-----------------------------------------------|
-| `section-2.2`   | `/sims/ch2-mechanical-study`                  |
-| `section-s4`    | `/sims/ch5-exponential-survival-probability`  |
-| `section-4.1.2` | `/sims/ch5-exponential-proliferation-regimes` |
-| `section-s6`    | `/sims/ch6-heterotypic-survival-difference`   |
-| `section-4.2.3` | `/sims/ch6-heterotypic-proliferation-regimes` |
+| Symbolic link   | Target directory                                     |
+|-----------------|------------------------------------------------------|
+| `section-s4`    | `/sims/thesis/ch5-exponential-survival-probability`  |
+| `section-4.1.2` | `/sims/thesis/ch5-exponential-proliferation-regimes` |
+| `section-s6`    | `/sims/thesis/ch6-heterotypic-survival-difference`   |
+| `section-4.2.3` | `/sims/thesis/ch6-heterotypic-proliferation-regimes` |
