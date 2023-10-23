@@ -70,22 +70,22 @@ $(shell mkdir -p images/paper)
 
 # Thesis image rules
 images/thesis/chapter-2/survival-frequency-difference-histograms.png: \
-	data/mechanical-cell-competition-heterotypic-data.csv \
-	data/mechanical-cell-competition-homotypic-data.csv \
+	data/mechanical-grid-heterotypic-data.csv \
+	data/mechanical-grid-homotypic-data.csv \
 	figures/thesis/mechanical-cell-competition-analysis.py
 	python3 figures/thesis/mechanical-cell-competition-analysis.py \
-		data/mechanical-cell-competition-heterotypic-data.csv  \
-		data/mechanical-cell-competition-homotypic-data.csv \
+		data/mechanical-grid-heterotypic-data.csv  \
+		data/mechanical-grid-homotypic-data.csv \
 		diff-theta-histogram \
 		$@
 
 images/thesis/chapter-2/pearson-correlation.png: \
-	data/mechanical-cell-competition-heterotypic-data.csv \
-	data/mechanical-cell-competition-homotypic-data.csv \
+	data/mechanical-grid-heterotypic-data.csv \
+	data/mechanical-grid-homotypic-data.csv \
 	figures/thesis/mechanical-cell-competition-analysis.py
 	python3 figures/thesis/mechanical-cell-competition-analysis.py \
-		data/mechanical-cell-competition-heterotypic-data.csv  \
-		data/mechanical-cell-competition-homotypic-data.csv \
+		data/mechanical-grid-heterotypic-data.csv  \
+		data/mechanical-grid-homotypic-data.csv \
 		pearson-correlation \
 		$@
 
