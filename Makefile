@@ -46,14 +46,17 @@ PAPERIMAGES = \
 		 images/paper/classification-of-competitive-interactions.png \
 		 images/paper/competition-regimes.png \
 		 images/paper/competition-regimes-transformed.png \
-		 images/paper/heterotypic-survival-difference-well-mixed.png \
-		 images/paper/heterotypic-survival-difference-vertex.png \
-		 images/paper/homotypic-survival-difference-A-well-mixed.png \
-		 images/paper/homotypic-survival-difference-B-well-mixed.png \
-		 images/paper/homotypic-survival-difference-A-vertex.png \
-		 images/paper/homotypic-survival-difference-B-vertex.png \
-		 images/paper/homotypic-survival-frequency-well-mixed.png \
-		 images/paper/homotypic-survival-frequency-vertex.png
+		 images/paper/supplementary/heterotypic-survival-difference-well-mixed.png \
+		 images/paper/supplementary/heterotypic-survival-difference-vertex.png \
+		 images/paper/supplementary/homotypic-survival-difference-A-well-mixed.png \
+		 images/paper/supplementary/homotypic-survival-difference-B-well-mixed.png \
+		 images/paper/supplementary/homotypic-survival-difference-A-vertex.png \
+		 images/paper/supplementary/homotypic-survival-difference-B-vertex.png \
+		 images/paper/supplementary/homotypic-survival-frequency-well-mixed.png \
+		 images/paper/supplementary/homotypic-survival-frequency-vertex.png \
+		 images/paper/supplementary/homotypic-simulation-eta-0.2.png \
+		 images/paper/supplementary/homotypic-simulation-eta-0.05.png \
+		 images/paper/supplementary/heterotypic-simulation.png
 
 all: thesis_images paper_images
 
@@ -70,7 +73,7 @@ $(shell mkdir -p images/thesis/chapter-4)
 $(shell mkdir -p images/thesis/chapter-5)
 $(shell mkdir -p images/thesis/chapter-6)
 $(shell mkdir -p images/thesis/chapter-7)
-$(shell mkdir -p images/paper)
+$(shell mkdir -p images/paper/supplementary)
 
 # Thesis image rules
 images/thesis/chapter-2/survival-frequency-difference-histograms.png: \
@@ -474,7 +477,8 @@ images/paper/competition-regimes-transformed.png: \
 	python3 figures/paper/plot-competition-regimes-transformed.py \
 		$@
 
-images/paper/heterotypic-survival-difference-well-mixed.png: \
+# Supplementary material of paper
+images/paper/supplementary/heterotypic-survival-difference-well-mixed.png: \
 	figures/paper/formatting.py \
 	figures/paper/plot-heterotypic-survival-difference-well-mixed.py \
 	figures/paper/plot_survival_difference.py \
@@ -483,7 +487,7 @@ images/paper/heterotypic-survival-difference-well-mixed.png: \
 		data/heterotypic-survival-difference-well-mixed-data.csv \
 		$@
 
-images/paper/heterotypic-survival-difference-vertex.png: \
+images/paper/supplementary/heterotypic-survival-difference-vertex.png: \
 	figures/paper/formatting.py \
 	figures/paper/plot-heterotypic-survival-difference-vertex.py \
 	figures/paper/plot_survival_difference.py \
@@ -492,7 +496,7 @@ images/paper/heterotypic-survival-difference-vertex.png: \
 		data/heterotypic-survival-difference-vertex-data.csv \
 		$@
 
-images/paper/homotypic-survival-difference-%-well-mixed.png: \
+images/paper/supplementary/homotypic-survival-difference-%-well-mixed.png: \
 	figures/paper/formatting.py \
 	figures/paper/plot-homotypic-survival-difference-well-mixed.py \
 	figures/paper/plot_survival_difference.py \
@@ -504,7 +508,7 @@ images/paper/homotypic-survival-difference-%-well-mixed.png: \
 		$* \
 		$@
 
-images/paper/homotypic-survival-difference-%-vertex.png: \
+images/paper/supplementary/homotypic-survival-difference-%-vertex.png: \
 	figures/paper/formatting.py \
 	figures/paper/plot-homotypic-survival-difference-vertex.py \
 	figures/paper/plot_survival_difference.py \
@@ -516,7 +520,7 @@ images/paper/homotypic-survival-difference-%-vertex.png: \
 		$* \
 		$@
 
-images/paper/homotypic-survival-frequency-well-mixed.png: \
+images/paper/supplementary/homotypic-survival-frequency-well-mixed.png: \
 	figures/paper/formatting.py \
 	figures/paper/plot-homotypic-survival-frequency-well-mixed.py \
 	data/homotypic-survival-frequency-well-mixed-data.csv
@@ -525,10 +529,26 @@ images/paper/homotypic-survival-frequency-well-mixed.png: \
 		n \
 		$@
 
-images/paper/homotypic-survival-frequency-vertex.png: \
+images/paper/supplementary/homotypic-survival-frequency-vertex.png: \
 	figures/paper/formatting.py \
 	figures/paper/plot-homotypic-survival-frequency-vertex.py \
 	data/homotypic-survival-frequency-vertex-data.csv
 	python3 figures/paper/plot-homotypic-survival-frequency-vertex.py \
 		data/homotypic-survival-frequency-vertex-data.csv \
 		$@ y
+
+images/paper/supplementary/homotypic-simulation-eta-%.png: \
+	figures/paper/formatting.py \
+	figures/paper/plot-homotypic-simulation.py \
+	data/eta-%-simulation.csv
+	python3 figures/paper/plot-homotypic-simulation.py \
+		data/eta-$*-simulation.csv \
+		$@
+
+images/paper/supplementary/heterotypic-simulation.png: \
+	figures/paper/formatting.py \
+	figures/paper/plot-heterotypic-simulation.py \
+	data/heterotypic-simulation.csv
+	python3 figures/paper/plot-heterotypic-simulation.py \
+		data/heterotypic-simulation.csv \
+		$@
